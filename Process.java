@@ -2,6 +2,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -70,7 +71,7 @@ public class Process implements Comparable<Process> {
 	 * Sorts the process list by arrival time
 	 * @param list the process list
 	 */
-	public static void sortByAt(List<Process> list)
+	public static void sortByAt(LinkedList<Process> list)
 	{
 		Collections.sort(list, new Comparator<Process>(){
 			   public int compare(Process p1, Process p2){
@@ -122,7 +123,7 @@ public class Process implements Comparable<Process> {
 	 * Helper method to sort and rename the process list
 	 * @param list the list to be sorted and renamed
 	 */
-	public void sortAndRename(List<Process> list)
+	public void sortAndRename(LinkedList<Process> list)
 	{
 		Process.sortByAt(list); //sorting the processes based on arrival time
 		int i = 1;
@@ -133,7 +134,7 @@ public class Process implements Comparable<Process> {
 		}
 	}
 	
-	public void updateIdx(List<Process> list)
+	public void updateIdx(LinkedList<Process> list)
 	{
 		int i = 1;
 		for(Process p : list)
@@ -144,7 +145,7 @@ public class Process implements Comparable<Process> {
 	}
 	
 	
-	public void printList(List<Process> list)
+	public void printList(LinkedList<Process> list)
 	{
 		System.out.printf("%5s%20s%20s%25s%n", "Process Name", "Size (in pages)", "Arrival Time ", "Service Duration(secs)");
 
@@ -185,7 +186,7 @@ public class Process implements Comparable<Process> {
 	{
 		Process temp = new Process();
 		
-		List<Process> list = new ArrayList<Process>();
+		LinkedList<Process> list = new LinkedList<Process>();
 		
 		for(int i = 1;  i < 151; i++)
 		{

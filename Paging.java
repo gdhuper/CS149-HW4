@@ -12,7 +12,27 @@ public class Paging {
 	}
 	
 	
+	/**
+	 * Method to execute a process
+	 * @param p the process to be executed
+	 */
+	public void executeProcess(Process p)
+	{
+		//Algorithm:
+		//All the processes are sorted based on their arrival time 
+		//and then a process from the start of Queue is taken out for processing 
+		//if there are atleast 4 pages available on main memory (i.e TOTAL_PAGES >= 4),
+		//start executing the process else wait for others to finish
+		
+		
+	}
 	
+	
+	/**
+	 * Helper method to make random reference to the pages of a process
+	 * @param pageSize the size of process
+	 * @return index of next
+	 */
 	public int localityRef(int pageSize)
 	{
 		int nextIdx = 0;
