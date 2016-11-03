@@ -2,28 +2,36 @@ import java.util.LinkedList;
 import java.util.Random;
 
 public class Paging {
+
+	private static final int MIN_PAGES_REQ = 4;
+
+	private LinkedList<Page> freePagesList;
 	
-	public static final int TOTAL_PAGES = 100;
-	public static final int MIN_PAGES_REQ = 4;
-	
-	private int pagesLeft = 100;
-	
-	public Paging()
-	{
-		
-	}
-	
-	
-	public int getPagesLeft() {
-		return pagesLeft;
+	public Paging(int memorySize, int pageSize) {
+		int pagesCount = memorySize / pageSize;
+		freePagesList = new LinkedList<>();
+
+		for (int i = 0; i < pagesCount; i++) {
+			freePagesList.add(new Page(pageSize));
+		}
 	}
 
-
-	public void setPagesLeft(int pagesLeft) {
-		this.pagesLeft = pagesLeft;
+	/**
+	 * Checks if there are at least 4 free pages.
+	 * @return whether there are at least 4 free pages
+     */
+	public boolean isFull() {
+		return freePagesList.size() < MIN_PAGES_REQ;
 	}
 
+	/**
+	 *
+	 * @param p
+     */
+	public void addProcess(Process p) {
 
+	}
+	
 	/**
 	 * Method to execute a process
 	 * @param p the process to be executed
@@ -35,27 +43,9 @@ public class Paging {
 		//and then a process from the start of Queue is taken out for processing 
 		//if there are atleast 4 pages available on main memory (i.e TOTAL_PAGES >= 4),
 		//start executing the process else wait for others to finish
-		int processPageSize = p.getPsize(); //No of pages in a process 
-		LinkedList<String> tempList = new LinkedList<String>();
-		
-		for(int i =0; i < p.getPsize(); i++)
-		{
-			tempList.add(p.getName() + "-" +  i);	
-		}
-		
-		if(getPagesLeft() >= 4)
-		{
-			//Start executing process
-			
-		}
-		
-		
 		
 		
 	}
-	
-	
-	
 	
 	
 	/**
@@ -91,11 +81,7 @@ public class Paging {
 	
 	public static void main(String[] args)
 	{
-		//Paging p = new Paging();
-		//Process pro = new Process();
-		
-		//Process process = pro.generateProcess("P0");
-		//p.executeProcess(process);
+//		Paging p = new Paging();
 		
 		//Testing locality reference algorithm
 		//System.out.println(p.localityRef(11));
