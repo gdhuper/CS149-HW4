@@ -11,6 +11,7 @@ public class Tester {
     private static final int MAX_JOBS = 150;
     private static final int MEMORY_LIMIT = 100;
     private static final int PAGE_SIZE = 1;
+    static int counter = 0;
 
     private static LinkedList<Process> jobQueue;
     private static Paging paging;
@@ -23,7 +24,6 @@ public class Tester {
         Collections.sort(jobQueue, Process::compareTo);
 
         paging = new Paging(MEMORY_LIMIT, PAGE_SIZE);
-
         final Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             final long t0 = System.currentTimeMillis();
@@ -36,11 +36,16 @@ public class Tester {
                     // Cancel after 1 minute (60 * 1000 msec)
                     timer.cancel();
                 } else if (!paging.isFull()) {
+                	
                     // Every 100 msec, run new job if at least 4 pages free
                     final Process p = jobQueue.getFirst();
                     // Check if a new job is arriving
                     if (elapsedTime >= p.getArrivalTime()) {
                         scheduleJob(p);
+                        System.out.println(counter); //checking if all the processes arrive or not
+                        counter++;
+                      
+                       
                     }
                 }
             }
