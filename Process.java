@@ -202,9 +202,9 @@ public class Process implements Comparable<Process> {
 	}
 
 	@Override
-	public int compareTo(Process o)
+	public int compareTo(Process p)
 	{
-		return Float.compare(arrivalTime, o.arrivalTime);
+		return Float.compare(arrivalTime, p.arrivalTime);
 	}
 
 }

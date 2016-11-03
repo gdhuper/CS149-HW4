@@ -1,16 +1,36 @@
+import java.util.LinkedList;
 import java.util.Random;
 
 public class Paging {
+
+	private static final int MIN_PAGES_REQ = 4;
+
+	private LinkedList<Page> freePagesList;
 	
-	public static final int TOTAL_PAGES = 100;
-	public static final int MIN_PAGES_REQ = 4;
-	
-	
-	public Paging()
-	{
-		
+	public Paging(int memorySize, int pageSize) {
+		int pagesCount = memorySize / pageSize;
+		freePagesList = new LinkedList<>();
+
+		for (int i = 0; i < pagesCount; i++) {
+			freePagesList.add(new Page(pageSize));
+		}
 	}
-	
+
+	/**
+	 * Checks if there are at least 4 free pages.
+	 * @return whether there are at least 4 free pages
+     */
+	public boolean isFull() {
+		return freePagesList.size() < MIN_PAGES_REQ;
+	}
+
+	/**
+	 *
+	 * @param p
+     */
+	public void addProcess(Process p) {
+
+	}
 	
 	/**
 	 * Method to execute a process
@@ -61,7 +81,7 @@ public class Paging {
 	
 	public static void main(String[] args)
 	{
-		Paging p = new Paging();
+//		Paging p = new Paging();
 		
 		//Testing locality reference algorithm
 		//System.out.println(p.localityRef(11));
