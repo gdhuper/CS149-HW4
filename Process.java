@@ -180,8 +180,16 @@ public class Process implements Comparable<Process> {
 	public void setPsize(int psize) {
 		Psize = psize;
 	}
+	
+	@Override
+	public int compareTo(Process o)
+	{
+		return Float.compare(arrivalTime, o.arrivalTime);
+	}
 
-
+	
+	
+	
 	public static void main(String[] args)
 	{
 		Process temp = new Process();
@@ -201,11 +209,7 @@ public class Process implements Comparable<Process> {
 		
 	}
 
-	@Override
-	public int compareTo(Process o)
-	{
-		return Float.compare(arrivalTime, o.arrivalTime);
-	}
+	
 
 }
 	

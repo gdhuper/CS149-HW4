@@ -19,7 +19,7 @@ public class Tester {
 
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
-            long t0 = System.currentTimeMillis();
+        long t0 = System.currentTimeMillis();
 
             @Override
             public void run() {
@@ -29,6 +29,7 @@ public class Tester {
                 } else {
                     // Do stuff here every 100msec
                     System.out.println("test");
+                    //Execute a process 
                 }
 
             }
