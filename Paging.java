@@ -1,13 +1,18 @@
+import replacementalgorithms.ReplacementAlgorithm;
+
 import java.util.LinkedList;
 import java.util.Random;
 
 public class Paging {
 
-	private static final int MIN_PAGES_REQ = 4;
-
+	private int minPagesRequired;
+	private ReplacementAlgorithm alg;
 	private LinkedList<Page> freePagesList;
 	
-	public Paging(int memorySize, int pageSize) {
+	public Paging(int memorySize, int pageSize, int minPagesRequired, ReplacementAlgorithm alg) {
+		this.minPagesRequired = minPagesRequired;
+		this.alg = alg;	
+
 		int pagesCount = memorySize / pageSize;
 		freePagesList = new LinkedList<>();
 
@@ -21,7 +26,7 @@ public class Paging {
 	 * @return whether there are at least 4 free pages
      */
 	public boolean isFull() {
-		return freePagesList.size() < MIN_PAGES_REQ;
+		return freePagesList.size() < minPagesRequired;
 	}
 
 	/**
@@ -60,13 +65,13 @@ public class Paging {
 		Random random = new Random();
 		int r = random.nextInt(pageSize);
 		int[] deltaIs = {-1, 0, 1};
-		if(r >= 0  && r < (pageSize - MIN_PAGES_REQ))
+		if(r >= 0  && r < (pageSize - minPagesRequired))
 		{
 			int deltaIdx = random.nextInt(3);
 			nextIdx = deltaIs[deltaIdx];
 			
 		}
-		else if(r >= (pageSize - MIN_PAGES_REQ) && r <	pageSize -1)
+		else if(r >= (pageSize - minPagesRequired) && r <	pageSize -1)
 		{
 			int j = random.nextInt(pageSize -1 ) + 2;
 			nextIdx = j;
