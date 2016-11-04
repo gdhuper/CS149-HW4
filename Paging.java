@@ -1,7 +1,5 @@
-import replacementalgorithms.FIFO;
 import replacementalgorithms.ReplacementAlgorithm;
 
-import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.Timer;
@@ -20,8 +18,9 @@ public class Paging {
 		int pagesCount = memorySize / pageSize;
 		freePagesList = new LinkedList<>();
 
+		// Initialize free pages
 		for (int i = 0; i < pagesCount; i++) {
-			freePagesList.add(new Page("", pageSize));
+			freePagesList.add(new Page(i + "", pageSize));
 		}
 	}
 
@@ -34,62 +33,70 @@ public class Paging {
 	}
 
 	/**
-	 *
-	 * @param p
-     */
-	public void addProcess(Process p) {
-		
-	}
-	
-	/**
 	 * Method to execute a process
 	 * @param p the process to be executed
 	 */
-	public void executeProcess(Process p)
-	{
-		Page[] tempArray = new Page[p.getPsize()];
-		for(int i = 0; i < p.getPsize(); i++)
-		{
-			tempArray[i] = new Page(p.getName() + "-" + i, 1);
-		}
-		   final Timer timer = new Timer();
-	        timer.schedule(new TimerTask() {
-	            final long t0 = System.currentTimeMillis();
+	public void executeProcess(Process p) {
+		initializeProcess(p);
 
-	            @Override
-	            public void run() {
-	                final long elapsedTime = System.currentTimeMillis() - t0;
+		final Timer timer = new Timer();
+		timer.schedule(new TimerTask() {
+			final long t0 = System.currentTimeMillis();
 
-	                if (elapsedTime > p.getArrivalTime() * 1000) {
-	                    //run each process for its service duration
-	                	
-	                    timer.cancel();
-	                } else if (!isFull() && freePagesList.size() >=4) {
-	                	//Every 100 msec process will make a memory reference to another page in that process
-	                    if (elapsedTime >= 100) {
-	                    	int idx = localityRef(p.getPsize()); //gets next random index its page reference
-	                        System.out.println("Refering to another page: " + tempArray[idx].getName());
-	                        
-	                    }
-	                }
-	                else
-	                {
-	                	System.out.println("NO more free pages! waiting for free page...");
-	                	//this is where swapping algorithm goes
-	                }
-	            }
-	        }, 0, 100);
-		
-		
+			@Override
+			public void run() {
+				final long elapsedTime = System.currentTimeMillis() - t0;
+
+				if (elapsedTime > p.getArrivalTime() * 1000) {
+					//run each process for its service duration
+
+					timer.cancel();
+				} else {
+					//Every 100 msec process will make a memory reference to another page in that process
+					referencePage(p);
+				}
+			}
+		}, 0, 100);
 	}
-	
+
+	/**
+	 * Initialize process by referencing page 0.
+	 * @param p the process to initialize
+	 */
+	private synchronized void initializeProcess(Process p) {
+		if (!freePagesList.isEmpty()) {
+			final Page page = freePagesList.removeFirst();
+			p.setPageReferenced(0, page);
+		}
+	}
+
+	/**
+	 * Reference page from freePagesList if not already referenced. Synchronized to prevent race conditions.
+	 * @param p the process to reference a new page for
+     */
+	private synchronized void referencePage(Process p) {
+		if (!freePagesList.isEmpty()) {
+			int i = localityRef(p.getPageSize()); //gets next random index its page reference
+			if (!p.isPageReferenced(i)) {
+				System.out.println("Referencing page: " + i);
+				final Page page = freePagesList.removeFirst();
+				p.setPageReferenced(i, page);
+			} else {
+				System.out.println("Page referenced");
+			}
+		} else {
+			System.out.println("NO more free pages! waiting for free page...");
+			//this is where swapping algorithm goes
+			alg.replace();
+		}
+	}
 	
 	/**
 	 * Helper method to make random reference to the pages of a process
 	 * @param pageSize the size of process
 	 * @return index of next
 	 */
-	public int localityRef(int pageSize)
+	private int localityRef(int pageSize)
 	{
 		int nextIdx = 0;
 		
@@ -111,22 +118,5 @@ public class Paging {
 		}
 		
 		return nextIdx;
-				
-		
-		
 	}
-	
-	
-	public static void main(String[] args)
-	{
-		Paging p = new Paging(100, 1, 4, new FIFO());
-		//System.out.println(p.freePagesList.size());
-		
-		//Testing locality reference algorithm
-		//System.out.println(p.localityRef(11));
-		
-	}
-	
-	
-
 }
