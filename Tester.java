@@ -41,6 +41,8 @@ public class Tester {
                 if (elapsedTime > MAX_ARRIVAL_TIME * 1000 || jobQueue.isEmpty()) {
                     // Cancel after 1 minute (60 * 1000 msec)
                     timer.cancel();
+                    // Exit here to stop all other threads
+                    System.exit(0);
                 } else if (!paging.isFull()) {
                     // Every 100 msec, run new job if at least 4 pages free
                     final Process p = jobQueue.getFirst();
@@ -53,7 +55,7 @@ public class Tester {
         }, 0, 100);
     }
 
-    private static void scheduleJob(Process p) {
+    private static synchronized void scheduleJob(Process p) {
         System.out.println(p.getName() + " - " + p.getArrivalTime() + " : " + p.getServiceDuration());
         paging.executeProcess(p); //executes the process
         jobQueue.removeFirst();

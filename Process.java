@@ -39,7 +39,7 @@ public class Process implements Comparable<Process> {
         pages[i] = p;
     }
 
-    public Page unreferencePage(int i) {
+    public Page dereferencePage(int i) {
         Page page = pages[i];
         pages[i] = null;
         return page;
@@ -49,8 +49,12 @@ public class Process implements Comparable<Process> {
         return arrivalTime;
     }
 
-    public String toString() {
-        return "ProcessName: \n" + this.getName() + "\nSize (in pages):\n" + this.pageCount + "\nArrival Time:\n" + this.getArrivalTime() + "\nService duration:\n" + this.serviceDuration;
+    public float getServiceDuration() {
+        return serviceDuration;
+    }
+
+    public int getPageCount() {
+        return pageCount;
     }
 
     public void printList(LinkedList<Process> list) {
@@ -62,16 +66,9 @@ public class Process implements Comparable<Process> {
         }
     }
 
-    public float getServiceDuration() {
-        return serviceDuration;
-    }
-
-    public int getPageCount() {
-        return pageCount;
-    }
-
-    public void setPageCount(int pageCount) {
-        this.pageCount = pageCount;
+    @Override
+    public String toString() {
+        return "ProcessName: \n" + this.getName() + "\nSize (in pages):\n" + this.pageCount + "\nArrival Time:\n" + this.getArrivalTime() + "\nService duration:\n" + this.serviceDuration;
     }
 
     @Override

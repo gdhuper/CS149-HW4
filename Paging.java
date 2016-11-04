@@ -47,14 +47,10 @@ public class Paging {
 			public void run() {
 				final long elapsedTime = System.currentTimeMillis() - t0;
 
+				// run each process for its service duration
 				if (elapsedTime >= p.getServiceDuration() * 1000) {
-					//run each process for its service duration
+					// Process is finished
 					System.err.println(p.getName() + " terminating after " + elapsedTime / 1000.0 + " seconds");
-					for (int i = 0; i < p.getPageCount(); i++) {
-						Page unreferencedPage = p.unreferencePage(i);
-						if (unreferencedPage != null)
-							freePagesList.add(unreferencedPage);
-					}
 					timer.cancel();
 				} else {
 					//Every 100 msec process will make a memory reference to another page in that process
@@ -81,7 +77,8 @@ public class Paging {
      */
 	private synchronized void referencePage(Process p) {
 		if (!freePagesList.isEmpty()) {
-			int i = localityRef(p.getPageCount()); //gets next random index its page reference
+			int i = localityRef(p.getPageCount()); //gets next random index to its page reference
+			// If not already referenced...
 			if (!p.isPageReferenced(i)) {
 				System.out.println("Referencing page for " + p.getName() + ": " + i);
 				final Page page = freePagesList.removeFirst();
@@ -90,7 +87,7 @@ public class Paging {
 //				System.out.println("Page already referenced for " + p.getName() + ": " + i);
 			}
 		} else {
-//			System.out.println("NO more free pages! waiting for free page...");
+			System.out.println("NO more free pages! waiting for free page...");
 			//this is where swapping algorithm goes
 			alg.replace();
 		}
