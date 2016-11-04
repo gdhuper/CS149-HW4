@@ -25,8 +25,8 @@ public class Paging {
 	}
 
 	/**
-	 * Checks if there are at least 4 free pages.
-	 * @return whether there are at least 4 free pages
+	 * Checks if there are at least specified minimum free pages.
+	 * @return whether there are at least specified minimum free pages
      */
 	public boolean isFull() {
 		return freePagesList.size() < minPagesRequired;
@@ -50,6 +50,11 @@ public class Paging {
 				if (elapsedTime >= p.getServiceDuration() * 1000) {
 					//run each process for its service duration
 					System.err.println(p.getName() + " terminating after " + elapsedTime / 1000.0 + " seconds");
+					for (int i = 0; i < p.getPageCount(); i++) {
+						Page unreferencedPage = p.unreferencePage(i);
+						if (unreferencedPage != null)
+							freePagesList.add(unreferencedPage);
+					}
 					timer.cancel();
 				} else {
 					//Every 100 msec process will make a memory reference to another page in that process
@@ -76,7 +81,7 @@ public class Paging {
      */
 	private synchronized void referencePage(Process p) {
 		if (!freePagesList.isEmpty()) {
-			int i = localityRef(p.getPageSize()); //gets next random index its page reference
+			int i = localityRef(p.getPageCount()); //gets next random index its page reference
 			if (!p.isPageReferenced(i)) {
 				System.out.println("Referencing page for " + p.getName() + ": " + i);
 				final Page page = freePagesList.removeFirst();
@@ -111,10 +116,7 @@ public class Paging {
 		}
 		else if(r >= (pageSize - minPagesRequired) && r <	pageSize -1)
 		{
-	        int serviceDuration = random.nextInt(5) + 1;
-	        
-			int j = random.nextInt(pageSize -2 ) + 2;
-			nextIdx = j;
+			nextIdx = random.nextInt(pageSize -2 ) + 2;
 		}
 		
 		return nextIdx;

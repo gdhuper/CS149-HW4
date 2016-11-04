@@ -10,17 +10,17 @@ public class Process implements Comparable<Process> {
     private String name; //changed name type from char to STring
     private float arrivalTime;
     private float serviceDuration;
-    private int pageSize;
+    private int pageCount;
     private Page[] pages;
 
-    public Process(String name, int pageSize, float arrivalTime, int serviceDuration) {
+    public Process(String name, int pageCount, float arrivalTime, int serviceDuration) {
         this.name = name;
         this.arrivalTime = arrivalTime;
-        this.pageSize = pageSize;
+        this.pageCount = pageCount;
         this.serviceDuration = serviceDuration;
 
         // Initialize pages array
-        pages = new Page[pageSize];
+        pages = new Page[pageCount];
     }
 
     public String getName() {
@@ -50,14 +50,14 @@ public class Process implements Comparable<Process> {
     }
 
     public String toString() {
-        return "ProcessName: \n" + this.getName() + "\nSize (in pages):\n" + this.pageSize + "\nArrival Time:\n" + this.getArrivalTime() + "\nService duration:\n" + this.serviceDuration;
+        return "ProcessName: \n" + this.getName() + "\nSize (in pages):\n" + this.pageCount + "\nArrival Time:\n" + this.getArrivalTime() + "\nService duration:\n" + this.serviceDuration;
     }
 
     public void printList(LinkedList<Process> list) {
         System.out.printf("%5s%20s%20s%25s%n", "Process Name", "Size (in pages)", "Arrival Time ", "Service Duration(secs)");
 
         for (Process p : list) {
-            System.out.printf("%5s%20s%20s%20s%n", p.getName(), p.getPageSize(), p.getArrivalTime(), p.getServiceDuration());
+            System.out.printf("%5s%20s%20s%20s%n", p.getName(), p.getPageCount(), p.getArrivalTime(), p.getServiceDuration());
 
         }
     }
@@ -66,12 +66,12 @@ public class Process implements Comparable<Process> {
         return serviceDuration;
     }
 
-    public int getPageSize() {
-        return pageSize;
+    public int getPageCount() {
+        return pageCount;
     }
 
-    public void setPageSize(int pageSize) {
-        this.pageSize = pageSize;
+    public void setPageCount(int pageCount) {
+        this.pageCount = pageCount;
     }
 
     @Override
