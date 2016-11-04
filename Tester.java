@@ -40,12 +40,10 @@ public class Tester {
                     // Every 100 msec, run new job if at least 4 pages free
                     final Process p = jobQueue.getFirst();
                     // Check if a new job is arriving
-                    if (elapsedTime >= p.getArrivalTime()) {
+                    if (elapsedTime / 1000.0 >= p.getArrivalTime()) {
                         scheduleJob(p);
                         System.out.println(counter); //checking if all the processes arrive or not
                         counter++;
-                      
-                       
                     }
                 }
             }
@@ -53,7 +51,7 @@ public class Tester {
     }
 
     private static void scheduleJob(Process p) {
-        System.out.println(p.getName());
+        System.out.println(p.getName() + " - " + p.getArrivalTime());
         paging.addProcess(p);
         jobQueue.removeFirst();
     }
