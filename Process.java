@@ -49,10 +49,6 @@ public class Process implements Comparable<Process> {
         return arrivalTime;
     }
 
-    public void setArrivalTime(float arrivalTime) {
-        this.arrivalTime = arrivalTime;
-    }
-
     public String toString() {
         return "ProcessName: \n" + this.getName() + "\nSize (in pages):\n" + this.pageSize + "\nArrival Time:\n" + this.getArrivalTime() + "\nService duration:\n" + this.serviceDuration;
     }
@@ -68,10 +64,6 @@ public class Process implements Comparable<Process> {
 
     public float getServiceDuration() {
         return serviceDuration;
-    }
-
-    public void setServiceDuration(float serviceDuration) {
-        this.serviceDuration = serviceDuration;
     }
 
     public int getPageSize() {

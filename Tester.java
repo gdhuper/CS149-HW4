@@ -14,6 +14,7 @@ public class Tester {
     private static final int MIN_PAGES_REQUIRED = 4;
     private static final float MIN_ARRIVAL_TIME = 0;
     private static final float MAX_ARRIVAL_TIME = 60;
+    private static final int[] MEMORY_SIZES = { 5, 11, 17, 31 };
 
     private static LinkedList<Process> jobQueue;
     private static Paging paging;
@@ -53,7 +54,7 @@ public class Tester {
     }
 
     private static void scheduleJob(Process p) {
-        System.out.println(p.getName() + " - " + p.getArrivalTime());
+        System.out.println(p.getName() + " - " + p.getArrivalTime() + " : " + p.getServiceDuration());
         paging.executeProcess(p); //executes the process
         jobQueue.removeFirst();
     }
@@ -62,9 +63,7 @@ public class Tester {
         float arrivalTime = nextRandomFloat(minArrivalTime, maxArrivalTime);
         arrivalTime = formatDecimal(arrivalTime, 2);
 
-        int[] serviceTimes = {5, 11, 17, 31};
-        int idx = random.nextInt(4);
-        int size = serviceTimes[idx];
+        int size = MEMORY_SIZES[random.nextInt(4)];
         int serviceDuration = random.nextInt(5) + 1;
 
         return new Process(name, size, arrivalTime, serviceDuration);
