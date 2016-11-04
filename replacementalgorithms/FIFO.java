@@ -9,6 +9,7 @@ public class FIFO implements ReplacementAlgorithm {
     public void replace() {
     	
     	//Add stuff here
+    	//Testing pull whatever
 
     }
 }
