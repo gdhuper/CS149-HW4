@@ -12,13 +12,11 @@ import java.util.Random;
  */
 public class Process implements Comparable<Process> {
 	
-	private String name;
+	private char name;
 	private float arrivalTime;
 	private float serviceDuration;
 	private int Psize;
-	
-	public static final float MIN_ARRIVAL_TIME = 149;
-	public static final float MAX_ARRIVAL_TIME = 0;
+
 	public static final float MIN_RUNTIME = (float) 0.1;
 	public static final float MAX_RUNTIME = 10;
 
@@ -28,7 +26,7 @@ public class Process implements Comparable<Process> {
 	}
 	
 	
-	public Process(String name, int Psize, float arrivalTime, int serviceDuration)
+	public Process(char name, int Psize, float arrivalTime, int serviceDuration)
 	{
 		this.name = name;
 		this.arrivalTime = arrivalTime;
@@ -40,10 +38,10 @@ public class Process implements Comparable<Process> {
 	
 	
 	
-	public static Process generateProcess(String name)
+	public static Process generateProcess(char name, float minArrivalTime, float maxArrivalTime)
 	{
 		Random random = new Random();
-        float arrivalTime =  nextRandomFloat(MIN_ARRIVAL_TIME, MAX_ARRIVAL_TIME); 
+        float arrivalTime =  nextRandomFloat(minArrivalTime, maxArrivalTime);
         arrivalTime = formatDecimal(arrivalTime, 2);
 
         int[] Stimes = {5, 11,17,31};
@@ -61,7 +59,7 @@ public class Process implements Comparable<Process> {
 	public static float nextRandomFloat(float min, float max)
 	{
 		Random random = new Random();
-		float temp = min + random.nextFloat() * (max - min);
+		float temp = max + random.nextFloat() * (min - max);
 		return temp;
 	}
 	
@@ -93,12 +91,12 @@ public class Process implements Comparable<Process> {
     }
 
 
-	public String getName() {
+	public char getName() {
 		return name;
 	}
 
 
-	public void setName(String name) {
+	public void setName(char name) {
 		this.name = name;
 	}
 
@@ -129,7 +127,7 @@ public class Process implements Comparable<Process> {
 		int i = 1;
 		for(Process p : list)
 		{	
-			p.setName("P" + i);
+//			p.setName("P" + i);
 			i++;
 		}
 	}
@@ -139,7 +137,7 @@ public class Process implements Comparable<Process> {
 		int i = 1;
 		for(Process p : list)
 		{	
-			p.setName("P" + i);
+//			p.setName("P" + i);
 			i++;
 		}
 	}
@@ -190,8 +188,8 @@ public class Process implements Comparable<Process> {
 		
 		for(int i = 1;  i < 151; i++)
 		{
-			Process tempProcess = temp.generateProcess("P" + i);
-			list.add(tempProcess);
+//			Process tempProcess = temp.generateProcess("P" + i);
+//			list.add(tempProcess);
 		}
 		
 		temp.sortAndRename(list);
