@@ -24,7 +24,7 @@ public class Tester {
     public static void main(String args[]) {
         jobQueue = new LinkedList<>();
         for (int i = 0; i < MAX_JOBS; i++) {
-            jobQueue.add(Process.generateProcess((char) ('0' + i), MIN_ARRIVAL_TIME, MAX_ARRIVAL_TIME));
+            jobQueue.add(Process.generateProcess("P" + i, MIN_ARRIVAL_TIME, MAX_ARRIVAL_TIME));
         }
         Collections.sort(jobQueue, Process::compareTo);
 
@@ -48,7 +48,6 @@ public class Tester {
                     // Check if a new job is arriving
                     if (elapsedTime / 1000.0 >= p.getArrivalTime()) {
                         scheduleJob(p);
-                      System.out.println(counter); //checking if all the processes arrive or not
                         counter++;
                     }
                 }
@@ -58,7 +57,7 @@ public class Tester {
 
     private static void scheduleJob(Process p) {
         System.out.println(p.getName() + " - " + p.getArrivalTime());
-        paging.addProcess(p);
+        paging.executeProcess(p); //executes the process 
         jobQueue.removeFirst();
     }
 }

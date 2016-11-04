@@ -1,7 +1,11 @@
+import replacementalgorithms.FIFO;
 import replacementalgorithms.ReplacementAlgorithm;
 
+import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Paging {
 
@@ -17,7 +21,7 @@ public class Paging {
 		freePagesList = new LinkedList<>();
 
 		for (int i = 0; i < pagesCount; i++) {
-			freePagesList.add(new Page(pageSize));
+			freePagesList.add(new Page("", pageSize));
 		}
 	}
 
@@ -43,11 +47,38 @@ public class Paging {
 	 */
 	public void executeProcess(Process p)
 	{
-		//Algorithm:
-		//All the processes are sorted based on their arrival time 
-		//and then a process from the start of Queue is taken out for processing 
-		//if there are atleast 4 pages available on main memory (i.e TOTAL_PAGES >= 4),
-		//start executing the process else wait for others to finish
+		Page[] tempArray = new Page[p.getPsize()];
+		for(int i = 0; i < p.getPsize(); i++)
+		{
+			tempArray[i] = new Page(p.getName() + "-" + i, 1);
+		}
+		   final Timer timer = new Timer();
+	        timer.schedule(new TimerTask() {
+	            final long t0 = System.currentTimeMillis();
+
+	            @Override
+	            public void run() {
+	                final long elapsedTime = System.currentTimeMillis() - t0;
+
+	                if (elapsedTime > p.getArrivalTime() * 1000) {
+	                    //run each process for its service duration
+	                	
+	                    timer.cancel();
+	                } else if (!isFull() && freePagesList.size() >=4) {
+	                	//Every 100 msec process will make a memory reference to another page in that process
+	                    if (elapsedTime >= 100) {
+	                    	int idx = localityRef(p.getPsize()); //gets next random index its page reference
+	                        System.out.println("Refering to another page: " + tempArray[idx].getName());
+	                        
+	                    }
+	                }
+	                else
+	                {
+	                	System.out.println("NO more free pages! waiting for free page...");
+	                	//this is where swapping algorithm goes
+	                }
+	            }
+	        }, 0, 100);
 		
 		
 	}
@@ -64,16 +95,18 @@ public class Paging {
 		
 		Random random = new Random();
 		int r = random.nextInt(pageSize);
-		int[] deltaIs = {-1, 0, 1};
+		int[] deltaIs = {0, 1};
 		if(r >= 0  && r < (pageSize - minPagesRequired))
 		{
-			int deltaIdx = random.nextInt(3);
+			int deltaIdx = random.nextInt(2);
 			nextIdx = deltaIs[deltaIdx];
 			
 		}
 		else if(r >= (pageSize - minPagesRequired) && r <	pageSize -1)
 		{
-			int j = random.nextInt(pageSize -1 ) + 2;
+	        int serviceDuration = random.nextInt(5) + 1;
+	        
+			int j = random.nextInt(pageSize -2 ) + 2;
 			nextIdx = j;
 		}
 		
@@ -86,7 +119,8 @@ public class Paging {
 	
 	public static void main(String[] args)
 	{
-//		Paging p = new Paging();
+		Paging p = new Paging(100, 1, 4, new FIFO());
+		//System.out.println(p.freePagesList.size());
 		
 		//Testing locality reference algorithm
 		//System.out.println(p.localityRef(11));

@@ -1,9 +1,7 @@
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Random;
 
 /**
@@ -12,7 +10,7 @@ import java.util.Random;
  */
 public class Process implements Comparable<Process> {
 	
-	private char name;
+	private String name; //changed name type from char to STring
 	private float arrivalTime;
 	private float serviceDuration;
 	private int Psize;
@@ -26,7 +24,7 @@ public class Process implements Comparable<Process> {
 	}
 	
 	
-	public Process(char name, int Psize, float arrivalTime, int serviceDuration)
+	public Process(String name, int Psize, float arrivalTime, int serviceDuration)
 	{
 		this.name = name;
 		this.arrivalTime = arrivalTime;
@@ -38,7 +36,7 @@ public class Process implements Comparable<Process> {
 	
 	
 	
-	public static Process generateProcess(char name, float minArrivalTime, float maxArrivalTime)
+	public static Process generateProcess(String name, float minArrivalTime, float maxArrivalTime)
 	{
 		Random random = new Random();
         float arrivalTime =  nextRandomFloat(minArrivalTime, maxArrivalTime);
@@ -91,12 +89,12 @@ public class Process implements Comparable<Process> {
     }
 
 
-	public char getName() {
+	public String getName() {
 		return name;
 	}
 
 
-	public void setName(char name) {
+	public void setName(String name) {
 		this.name = name;
 	}
 
@@ -185,17 +183,6 @@ public class Process implements Comparable<Process> {
 		Process temp = new Process();
 		
 		LinkedList<Process> list = new LinkedList<Process>();
-		
-		for(int i = 1;  i < 151; i++)
-		{
-//			Process tempProcess = temp.generateProcess("P" + i);
-//			list.add(tempProcess);
-		}
-		
-		temp.sortAndRename(list);
-		
-		temp.printList(list);
-		//After removing an element from index 0 call updateIdX(list) to update index of elements 
 		
 	}
 
