@@ -3,12 +3,12 @@
  */
 public class Page {
 
+    private int number;
     private int size;
-    private String name;
 
-    public Page(String name, int size) {
+    public Page(int number, int size) {
+        this.number = number;
         this.size = size;
-        this.name = name;
     }
 
 	public int getSize() {
@@ -19,11 +19,7 @@ public class Page {
 		this.size = size;
 	}
 
-	public String getName() {
-		return name;
-	}
-	
-	public void setName(String name) {
-		this.name = name;
-	}
+    public int getNumber() {
+        return number;
+    }
 }
