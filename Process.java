@@ -11,7 +11,7 @@ public class Process implements Comparable<Process> {
     private float arrivalTime;
     private float serviceDuration;
     private int pageCount;
-    private Page[] pages;
+    private LinkedList<Page> pages;
 
     public Process(String name, int pageCount, float arrivalTime, int serviceDuration) {
         this.name = name;
@@ -20,7 +20,10 @@ public class Process implements Comparable<Process> {
         this.serviceDuration = serviceDuration;
 
         // Initialize pages array
-        pages = new Page[pageCount];
+        pages = new LinkedList<>();
+        for (int i = 0; i < pageCount; i++) {
+            pages.add(i, null);
+        }
     }
 
     public String getName() {
@@ -32,17 +35,17 @@ public class Process implements Comparable<Process> {
     }
 
     public boolean isPageReferenced(int i) {
-        return pages[i] != null;
+        return pages.get(i) != null;
     }
 
     public void setPageReferenced(int i, Page p) {
-        pages[i] = p;
+        pages.add(i, p);
     }
 
     public Page dereferencePage(int i) {
-        Page page = pages[i];
-        pages[i] = null;
-        return page;
+        Page p = pages.get(i);
+        pages.set(i, null);
+        return p;
     }
 
     public float getArrivalTime() {
