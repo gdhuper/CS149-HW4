@@ -38,7 +38,7 @@ public class Tester {
             public void run() {
                 final long elapsedTime = System.currentTimeMillis() - t0;
 
-                if (elapsedTime > MAX_ARRIVAL_TIME * 1000 || jobQueue.isEmpty()) {
+                if (elapsedTime >= MAX_ARRIVAL_TIME * 1000 || jobQueue.isEmpty()) {
                     // Cancel after 1 minute (60 * 1000 msec)
                     timer.cancel();
                     // Exit here to stop all other threads

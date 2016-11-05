@@ -22,4 +22,9 @@ public class Page {
     public int getNumber() {
         return number;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        return getClass() == o.getClass() && this.number == ((Page) o).getNumber();
+    }
 }

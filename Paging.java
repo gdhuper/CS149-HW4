@@ -64,7 +64,6 @@ public class Paging {
 //                            freePagesList.add(unreferencedPage);
 //                        }
 //                    }
-//                    printPageMap();
                     timer.cancel();
                 } else {
                     //Every 100 msec make a memory reference to another page in that process
@@ -105,7 +104,6 @@ public class Paging {
             final Page page = freePagesList.remove();
             p.setPageReferenced(i, page);
             pageMap[page.getNumber()] = p;
-                       printPageMap();
         } else {
             System.out.println("NO more free pages! waiting for free page...");
             //this is where swapping algorithm goes
@@ -114,9 +112,6 @@ public class Paging {
             final Page page =  freePagesList.remove();
             p.setPageReferenced(i, page);
             pageMap[0] = p;
-             printPageMap();
-            
-            
         }
     }
 
@@ -142,15 +137,18 @@ public class Paging {
         return nextIdx;
     }
 
-    private void printPageMap() {
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
         for (Process p : pageMap) {
             if (p != null) {
-                System.out.print(p.getName() + " ");
+                sb.append(p.getName());
             } else {
-                System.out.print(". ");
+                sb.append(".");
             }
+            sb.append(" ");
         }
-        System.out.println();
+        return sb.toString();
     }
     
     public static void main(String[] args)
