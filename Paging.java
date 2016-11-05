@@ -1,8 +1,10 @@
+import replacementalgorithms.FIFO;
 import replacementalgorithms.ReplacementAlgorithm;
 
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Paging {
@@ -10,6 +12,7 @@ public class Paging {
     private int minPagesRequired;
     private ReplacementAlgorithm alg;
     private ConcurrentLinkedQueue<Page> freePagesList;
+    
     private Process[] pageMap;
 
     public Paging(int memorySize, int pageSize, int minPagesRequired, ReplacementAlgorithm alg) {
@@ -18,7 +21,7 @@ public class Paging {
 
         final int pagesCount = memorySize / pageSize;
         freePagesList = new ConcurrentLinkedQueue<>();
-        pageMap = new Process[pagesCount];
+        pageMap = new Process[pagesCount]; //array to keep track of processes 
 
         // Initialize free pages
         for (int i = 0; i < pagesCount; i++)
@@ -84,7 +87,7 @@ public class Paging {
         }
     }
 
-    /**
+    /** 
      * Reference page from freePagesList if not already referenced. Synchronized to prevent race conditions.
      *
      * @param p the process to reference a new page for
@@ -102,11 +105,18 @@ public class Paging {
             final Page page = freePagesList.remove();
             p.setPageReferenced(i, page);
             pageMap[page.getNumber()] = p;
-            //            printPageMap();
+                       printPageMap();
         } else {
             System.out.println("NO more free pages! waiting for free page...");
             //this is where swapping algorithm goes
-            alg.replace();
+           
+            freePagesList.add(new Page(0, 1));
+            final Page page =  freePagesList.remove();
+            p.setPageReferenced(i, page);
+            pageMap[0] = p;
+             printPageMap();
+            
+            
         }
     }
 
@@ -141,5 +151,13 @@ public class Paging {
             }
         }
         System.out.println();
+    }
+    
+    public static void main(String[] args)
+    {
+    	Paging p = new Paging(100, 1,4, new FIFO());
+    	//System.out.println(p.freePagesList.size());
+       	//p.printPageMap();
+    	
     }
 }

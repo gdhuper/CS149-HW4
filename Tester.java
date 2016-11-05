@@ -52,13 +52,14 @@ public class Tester {
                     }
                 }
             }
-        }, 0, 100);
+        }, 0, 100); 	 	 	
     }
 
     private static synchronized void scheduleJob(Process p) {
         System.out.println(p.getName() + " - " + p.getArrivalTime() + " : " + p.getServiceDuration());
         paging.executeProcess(p); //executes the process
         jobQueue.removeFirst();
+        
     }
 
     private static Process generateProcess(String name, float minArrivalTime, float maxArrivalTime) {
