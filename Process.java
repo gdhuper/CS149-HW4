@@ -19,33 +19,33 @@ public class Process implements Comparable<Process> {
         this.pageCount = pageCount;
         this.serviceDuration = serviceDuration;
 
-        // Initialize pages array
+        // Initialize pages list
         pages = new LinkedList<>();
-        for (int i = 0; i < pageCount; i++) {
-            pages.add(i, null);
-        }
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public boolean isPageReferenced(int i) {
-        return pages.get(i) != null;
+        for (Page p : pages) {
+            if (p.getReferencedPage() == i)
+                return true;
+        }
+        return false;
     }
 
     public void setPageReferenced(int i, Page p) {
-        pages.add(i, p);
+        p.setReferencedPage(i);
+        pages.add(p);
     }
 
     public Page dereferencePage(int i) {
-        Page p = pages.get(i);
-        pages.set(i, null);
-        return p;
+        for (Page p : pages) {
+            if (p.getReferencedPage() == i)
+                return p;
+        }
+        return null;
     }
 
     public float getArrivalTime() {
