@@ -16,10 +16,10 @@ public class Tester {
     private static final float MAX_ARRIVAL_TIME = 60;
     private static final int[] MEMORY_SIZES = { 5, 11, 17, 31 };
 
+    private static final Random random = new Random();
+
     private static LinkedList<Process> jobQueue;
     private static Paging paging;
-
-    private static Random random = new Random();
 
     public static void main(String args[]) {
         jobQueue = new LinkedList<>();
@@ -47,17 +47,16 @@ public class Tester {
                     // Every 100 msec, run new job if at least 4 pages free
                     final Process p = jobQueue.getFirst();
                     // Check if a new job is arriving
-                    if (elapsedTime / 1000.0 >= p.getArrivalTime())
-                        scheduleJob(p);
+                    if (elapsedTime / 1000.0 >= p.getArrivalTime()) {
+                        System.out.printf("%s (SIZE: %d, DURATION: %.0f) ENTER: %.2fsec\n%s",
+                                p.getName(), p.getPageCount(), p.getServiceDuration(), elapsedTime / 1000.0,
+                                paging.toString());
+                        paging.executeProcess(p, elapsedTime); //executes the process
+                        jobQueue.removeFirst();
+                    }
                 }
             }
         }, 0, 100);
-    }
-
-    private static synchronized void scheduleJob(Process p) {
-        System.out.println(p.getName());
-        paging.executeProcess(p); //executes the process
-        jobQueue.removeFirst();
     }
 
     private static Process generateProcess(String name, float minArrivalTime, float maxArrivalTime) {

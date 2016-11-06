@@ -8,21 +8,20 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Paging {
 
-    private int minPagesRequired;
-    private ReplacementAlgorithm alg;
-    private ConcurrentLinkedQueue<Page> freePagesList;
+    private final int minPagesRequired;
+    private final ReplacementAlgorithm alg;
+    private final ConcurrentLinkedQueue<Page> freePagesList;
+    private final int pagesCount;
+    private final Process[] pageMap;
     private int runningProcessCount;
-    private int pagesCount;
-    private Process[] pageMap;
 
     public Paging(int memorySize, int pageSize, int minPagesRequired, ReplacementAlgorithm alg) {
         this.minPagesRequired = minPagesRequired;
         this.alg = alg;
 
-//        final int pagesCount = memorySize / pageSize;
         pagesCount = memorySize / pageSize;
         freePagesList = new ConcurrentLinkedQueue<>();
-        pageMap = new Process[pagesCount]; //array to keep track of processes
+        pageMap = new Process[pagesCount]; // array to keep track of processes
         runningProcessCount = 0;
 
         // Initialize free pages
@@ -31,21 +30,22 @@ public class Paging {
     }
 
     /**
-     * Checks if there are at least specified minimum free pages.
+     * Checks if there are at least specified minimum free pages for each running process.
+     * i.e., if minimum is 4, and max page count is 100, then there can be only 100/4 = 25 running processes.
      *
      * @return whether there are at least specified minimum free pages
      */
     public boolean isFull() {
-//        return freePagesList.size() < minPagesRequired;
         return minPagesRequired * runningProcessCount >= pagesCount;
     }
 
     /**
-     * Method to execute a process
+     * Execute process for its provided duration. Create a new thread for each process.
      *
      * @param p the process to be executed
+     * @param startTime the start time of the process
      */
-    public void executeProcess(Process p) {
+    public void executeProcess(Process p, float startTime) {
         initializeProcess(p);
 
         final Timer timer = new Timer();
@@ -56,14 +56,16 @@ public class Paging {
             public void run() {
                 final long elapsedTime = System.currentTimeMillis() - t0;
 
-                // run each process for its service duration
+                // Run each process for its service duration
                 if (elapsedTime >= p.getServiceDuration() * 1000) {
                     // Process is finished
-                    System.err.println(p.getName() + " terminating after " + elapsedTime / 1000 + " seconds");
+                    System.err.printf("%s (SIZE: %d, DURATION: %.0f) EXIT: %.2fsec\n%s",
+                            p.getName(), p.getPageCount(), p.getServiceDuration(), (startTime + elapsedTime) / 1000.0,
+                            Paging.this.toString());
                     runningProcessCount--;
                     timer.cancel();
                 } else {
-                    //Every 100 msec make a memory reference to another page in that process
+                    // Every 100 msec make a memory reference to another page in that process
                     referencePage(p);
                 }
             }
@@ -90,16 +92,16 @@ public class Paging {
      * @param p the process to reference a new page for
      */
     private synchronized void referencePage(Process p) {
-        final int i = localityRef(p.getPageCount()); // gets next random index to its page reference
+        final int pageToRefer = localityRef(p.getPageCount()); // gets next random index to its page reference
 
         // Return if already referenced
-        if (p.isPageReferenced(i)) return;
+        if (p.isPageReferenced(pageToRefer)) return;
 
         if (!freePagesList.isEmpty()) {
             // Free pages available
-            System.out.println("Referencing page for " + p.getName() + ": " + i);
+            System.out.println("Referencing page for " + p.getName() + ": " + pageToRefer);
             final Page page = freePagesList.remove();
-            p.setPageReferenced(i, page);
+            p.setPageReferenced(pageToRefer, page);
             pageMap[page.getNumber()] = p;
         } else {
             System.out.println("NO more free pages! waiting for free page...");

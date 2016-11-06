@@ -3,8 +3,8 @@
  */
 public class Page {
 
-    private int number;
-    private int size;
+    private final int number;
+    private final int size;
     private int referencedPage;
 
     public Page(int number, int size) {

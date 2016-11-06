@@ -5,11 +5,11 @@ import java.util.LinkedList;
  */
 public class Process implements Comparable<Process> {
 
-    private String name;
-    private float arrivalTime;
-    private float serviceDuration;
-    private int pageCount;
-    private LinkedList<Page> pages;
+    private final String name;
+    private final float arrivalTime;
+    private final float serviceDuration;
+    private final int pageCount;
+    private final LinkedList<Page> pages;
 
     public Process(String name, int pageCount, float arrivalTime, int serviceDuration) {
         this.name = name;
