@@ -40,6 +40,7 @@ public class Tester {
                     // Cancel after 1 minute (60 * 1000 msec)
                     timer.cancel();
                     System.out.println("Total Number of processes finished: " + paging.getFinishedProcessCount());
+                    System.out.println("Processes Missed: " + (150- paging.getFinishedProcessCount()));
                     // Exit here to stop all other threads
                     System.exit(0);
                 } else if (!paging.isFull()) {

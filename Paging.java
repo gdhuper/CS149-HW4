@@ -170,6 +170,7 @@ public class Paging {
             page = freePagesList.remove();
         } else {
             page = findPageToSwap();
+            
         }
 
         if (page != null) {
@@ -184,7 +185,7 @@ public class Paging {
     /**
      * Use given algorithm to find a page to swap.
      *
-     * @return the page to swap
+     * @return the page to swapn
      */
     private synchronized Page findPageToSwap() {
         final Page pageToSwap = alg.findPageToReplace(occupiedPages);
@@ -192,7 +193,7 @@ public class Paging {
             // Found a page to swap out. Dereference the page in the process.
             final Process referencedProcess = pageToSwap.getReferencedProcess();
             referencedProcess.dereferencePage(pageToSwap.getReferencedPage());
-
+            
             return pageToSwap;
         }
 
@@ -233,5 +234,17 @@ public class Paging {
             sb.append(" ");
         }
         return sb.toString();
+    }
+    
+    
+    
+    
+    
+    public void printOccupied()
+    {
+    	for(Page p: occupiedPages)
+    	{
+    		System.out.println(p.getReferencedProcess());
+    	}
     }
 }
