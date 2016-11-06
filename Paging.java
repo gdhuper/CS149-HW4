@@ -10,6 +10,8 @@ public class Paging {
     private final Process[] pageMap;
     private final ConcurrentLinkedQueue<Process> runningProcesses;
     private final List<Page> occupiedPages; // List of all pages that reference some processes' page
+    private int finishedProcessCount;
+    private  int initialIdx = 0;
 
     public Paging(int memorySize, int pageSize, int minPagesRequired, ReplacementAlgorithm alg) {
         this.minPagesRequired = minPagesRequired;
@@ -20,6 +22,9 @@ public class Paging {
         pageMap = new Process[pagesCount]; // array to keep track of processes
         runningProcesses = new ConcurrentLinkedQueue<>();
         occupiedPages = Collections.synchronizedList(new LinkedList<Page>());
+
+        finishedProcessCount = 0; //keep track of finished processes
+        initialIdx = 0;
 
         // Initialize free pages
         for (int i = 0; i < pagesCount; i++)
@@ -35,6 +40,12 @@ public class Paging {
     public boolean isFull() {
         return minPagesRequired * runningProcesses.size() >= pagesCount;
     }
+    
+    
+    public int getFinishedProcessCount()
+    {
+    	return this.finishedProcessCount;
+    }
 
     /**
      * Execute process for its provided duration. Create a new thread for each process.
@@ -44,6 +55,14 @@ public class Paging {
      */
     public void executeProcess(Process process, float startTime) {
         initializeProcess(process);
+//    	if(freePagesList.size() >= 4)
+//    	{
+//        initializeProcess(p);
+//    	}
+//    	else if(freePagesList.isEmpty())
+//    	{
+//    		freePagesAndInitializeProcess(p);
+//    	}
 
         final Timer timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -60,6 +79,7 @@ public class Paging {
                             process.getName(), process.getPageCount(), process.getServiceDuration(), (startTime + elapsedTime) / 1000.0,
                             Paging.this.toString());
                     runningProcesses.remove(process);
+                    finishedProcessCount++;
                     timer.cancel();
                 } else {
                     // Every 100 msec make a memory reference to another page in that process
@@ -89,6 +109,47 @@ public class Paging {
             occupiedPages.add(page);
             runningProcesses.add(process);
         }
+       
+    }
+    
+    /**
+     * Checking swapping by hardcoding FIFO
+     * adds 4 new pages to freepagesList and initializes the process
+     * @param p
+     */
+    private synchronized void freePagesAndInitializeProcess(Process p)
+    {
+    	System.out.println("Freeing pages from memory..");
+    	for(int i = 0; i < 4; i++)
+    	{
+    		
+    		 freePagesList.add(new Page(i, 1));
+    	}
+    	final Page page = freePagesList.remove();
+        p.setPageReferenced(0, page);
+        if(initialIdx < 100){
+        pageMap[initialIdx] = p;
+        }
+        else{
+        incrementCount(); //Increments the index at which next page in pageMap is to be removed
+        pageMap[initialIdx] = p;
+        }
+    }
+    
+    
+    /*
+     * Helper method to increment the index at which next page in pageMap is to be removed
+     * Testing FIFO by Hardcoding
+     */
+    private  synchronized void incrementCount() {
+    	if(initialIdx == 100)
+        {
+        	initialIdx = 0;
+        }else
+        {
+        initialIdx++;
+        }
+    	
     }
 
     /**
@@ -146,7 +207,7 @@ public class Paging {
      */
     private int localityRef(int pageSize) {
         int nextIdx = 0;
-
+        
         Random random = new Random();
         int r = random.nextInt(pageSize);
         int[] deltaIs = {0, 1};
@@ -154,7 +215,7 @@ public class Paging {
             int deltaIdx = random.nextInt(2);
             nextIdx = deltaIs[deltaIdx];
         } else if (r >= (pageSize - minPagesRequired) && r < pageSize - 1) {
-            nextIdx = random.nextInt(pageSize - 2) + 2;
+            nextIdx = random.nextInt(pageSize - 1) + 2;
         }
 
         return nextIdx;

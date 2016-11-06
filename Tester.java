@@ -26,7 +26,7 @@ public class Tester {
         }
         Collections.sort(jobQueue, Process::compareTo);
 
-        paging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new RandomSwap());
+        paging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new FIFO());
 
         final Timer timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -39,6 +39,7 @@ public class Tester {
                 if (elapsedTime >= MAX_ARRIVAL_TIME * 1000 || jobQueue.isEmpty()) {
                     // Cancel after 1 minute (60 * 1000 msec)
                     timer.cancel();
+                    System.out.println("Total Number of processes finished: " + paging.getFinishedProcessCount());
                     // Exit here to stop all other threads
                     System.exit(0);
                 } else if (!paging.isFull()) {
