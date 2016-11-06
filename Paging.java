@@ -122,7 +122,7 @@ public class Paging {
      */
     private int localityRef(int pageSize) {
         int nextIdx = 0;
-
+        
         Random random = new Random();
         int r = random.nextInt(pageSize);
         int[] deltaIs = {0, 1};
@@ -130,7 +130,7 @@ public class Paging {
             int deltaIdx = random.nextInt(2);
             nextIdx = deltaIs[deltaIdx];
         } else if (r >= (pageSize - minPagesRequired) && r < pageSize - 1) {
-            nextIdx = random.nextInt(pageSize - 2) + 2;
+            nextIdx = random.nextInt(pageSize - 1) + 2;
         }
 
         return nextIdx;
