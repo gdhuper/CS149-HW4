@@ -1,10 +1,9 @@
-package replacementalgorithms;
+import java.util.List;
 
-import java.lang.Process;
 /**
  * Created by jaylantse on 11/3/16.
  */
 public interface ReplacementAlgorithm {
 
-    void replace();
+    Page findPageToReplace(List<Page> occupiedPages);
 }

@@ -1,5 +1,3 @@
-import replacementalgorithms.FIFO;
-
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -28,7 +26,7 @@ public class Tester {
         }
         Collections.sort(jobQueue, Process::compareTo);
 
-        paging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new FIFO());
+        paging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new RandomSwap());
 
         final Timer timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -48,7 +46,7 @@ public class Tester {
                     final Process p = jobQueue.getFirst();
                     // Check if a new job is arriving
                     if (elapsedTime / 1000.0 >= p.getArrivalTime()) {
-                        System.out.printf("%s (SIZE: %d, DURATION: %.0f) ENTER: %.2fsec\n%s",
+                        System.out.printf("%s (SIZE: %d, DURATION: %.0f) ENTER: %.2fsec\n%s\n",
                                 p.getName(), p.getPageCount(), p.getServiceDuration(), elapsedTime / 1000.0,
                                 paging.toString());
                         paging.executeProcess(p, elapsedTime); //executes the process

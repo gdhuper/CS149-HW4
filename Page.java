@@ -6,6 +6,7 @@ public class Page {
     private final int number;
     private final int size;
     private int referencedPage;
+    private Process referencedProcess;
 
     public Page(int number, int size) {
         this.number = number;
@@ -30,8 +31,11 @@ public class Page {
         this.referencedPage = referencedPage;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        return getClass() == o.getClass() && this.number == ((Page) o).getNumber();
+    public void setReferencedProcess(Process p) {
+        this.referencedProcess = p;
+    }
+
+    public Process getReferencedProcess() {
+        return referencedProcess;
     }
 }

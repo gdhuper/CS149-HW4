@@ -35,6 +35,7 @@ public class Process implements Comparable<Process> {
 
     /**
      * Set specified page of this process as referenced in main memory
+     *
      * @param i the page to reference
      * @param p the page in main memory
      */
@@ -46,16 +47,14 @@ public class Process implements Comparable<Process> {
     /**
      * Dereference specified page from this process.
      * @param i the page to dereference
-     * @return the unreferenced page
      */
-    public Page dereferencePage(int i) {
+    public void dereferencePage(int i) {
         for (Page p : pages) {
             if (p.getReferencedPage() == i) {
                 p.setReferencedPage(-1);
-                return p;
+                break;
             }
         }
-        return null;
     }
 
     public float getArrivalTime() {
@@ -89,4 +88,12 @@ public class Process implements Comparable<Process> {
         return Float.compare(arrivalTime, p.arrivalTime);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (getClass() != o.getClass())
+            return false;
+
+        Process p = (Process) o;
+        return this.name.equals(p.getName());
+    }
 }

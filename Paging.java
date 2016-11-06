@@ -1,9 +1,4 @@
-import replacementalgorithms.FIFO;
-import replacementalgorithms.ReplacementAlgorithm;
-
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Paging {
@@ -13,7 +8,8 @@ public class Paging {
     private final ConcurrentLinkedQueue<Page> freePagesList;
     private final int pagesCount;
     private final Process[] pageMap;
-    private int runningProcessCount;
+    private final ConcurrentLinkedQueue<Process> runningProcesses;
+    private final List<Page> occupiedPages; // List of all pages that reference some processes' page
 
     public Paging(int memorySize, int pageSize, int minPagesRequired, ReplacementAlgorithm alg) {
         this.minPagesRequired = minPagesRequired;
@@ -22,7 +18,8 @@ public class Paging {
         pagesCount = memorySize / pageSize;
         freePagesList = new ConcurrentLinkedQueue<>();
         pageMap = new Process[pagesCount]; // array to keep track of processes
-        runningProcessCount = 0;
+        runningProcesses = new ConcurrentLinkedQueue<>();
+        occupiedPages = Collections.synchronizedList(new LinkedList<Page>());
 
         // Initialize free pages
         for (int i = 0; i < pagesCount; i++)
@@ -36,17 +33,17 @@ public class Paging {
      * @return whether there are at least specified minimum free pages
      */
     public boolean isFull() {
-        return minPagesRequired * runningProcessCount >= pagesCount;
+        return minPagesRequired * runningProcesses.size() >= pagesCount;
     }
 
     /**
      * Execute process for its provided duration. Create a new thread for each process.
      *
-     * @param p the process to be executed
+     * @param process the process to be executed
      * @param startTime the start time of the process
      */
-    public void executeProcess(Process p, float startTime) {
-        initializeProcess(p);
+    public void executeProcess(Process process, float startTime) {
+        initializeProcess(process);
 
         final Timer timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -57,16 +54,16 @@ public class Paging {
                 final long elapsedTime = System.currentTimeMillis() - t0;
 
                 // Run each process for its service duration
-                if (elapsedTime >= p.getServiceDuration() * 1000) {
+                if (elapsedTime >= process.getServiceDuration() * 1000) {
                     // Process is finished
-                    System.err.printf("%s (SIZE: %d, DURATION: %.0f) EXIT: %.2fsec\n%s",
-                            p.getName(), p.getPageCount(), p.getServiceDuration(), (startTime + elapsedTime) / 1000.0,
+                    System.err.printf("%s (SIZE: %d, DURATION: %.0f) EXIT: %.2fsec\n%s\n",
+                            process.getName(), process.getPageCount(), process.getServiceDuration(), (startTime + elapsedTime) / 1000.0,
                             Paging.this.toString());
-                    runningProcessCount--;
+                    runningProcesses.remove(process);
                     timer.cancel();
                 } else {
                     // Every 100 msec make a memory reference to another page in that process
-                    referencePage(p);
+                    referencePage(process);
                 }
             }
         }, 0, 100);
@@ -75,43 +72,70 @@ public class Paging {
     /**
      * Initialize process by referencing page 0.
      *
-     * @param p the process to initialize
+     * @param process the process to initialize
      */
-    private synchronized void initializeProcess(Process p) {
+    private synchronized void initializeProcess(Process process) {
+        Page page;
         if (!freePagesList.isEmpty()) {
-            final Page page = freePagesList.remove();
-            p.setPageReferenced(0, page);
-            pageMap[page.getNumber()] = p;
-            runningProcessCount++;
+            page = freePagesList.remove();
+        } else {
+            page = findPageToSwap();
+        }
+
+        if (page != null) {
+            process.setPageReferenced(0, page);
+            page.setReferencedProcess(process);
+            pageMap[page.getNumber()] = process;
+            occupiedPages.add(page);
+            runningProcesses.add(process);
         }
     }
 
-    /** 
+    /**
      * Reference page from freePagesList if not already referenced. Synchronized to prevent race conditions.
      *
-     * @param p the process to reference a new page for
+     * @param process the process to reference a new page for
      */
-    private synchronized void referencePage(Process p) {
-        final int pageToRefer = localityRef(p.getPageCount()); // gets next random index to its page reference
+    private synchronized void referencePage(Process process) {
+        final int pageToRefer = localityRef(process.getPageCount()); // gets next random index to its page reference
 
         // Return if already referenced
-        if (p.isPageReferenced(pageToRefer)) return;
+        if (process.isPageReferenced(pageToRefer)) return;
+
+        Page page;
 
         if (!freePagesList.isEmpty()) {
             // Free pages available
-            System.out.println("Referencing page for " + p.getName() + ": " + pageToRefer);
-            final Page page = freePagesList.remove();
-            p.setPageReferenced(pageToRefer, page);
-            pageMap[page.getNumber()] = p;
+            page = freePagesList.remove();
         } else {
-            System.out.println("NO more free pages! waiting for free page...");
-            //this is where swapping algorithm goes
-           
-//            freePagesList.add(new Page(0, 1));
-//            final Page page =  freePagesList.remove();
-//            p.setPageReferenced(i, page);
-//            pageMap[0] = p;
+            page = findPageToSwap();
         }
+
+        if (page != null) {
+            System.out.println("Referencing page for " + process.getName() + ": " + pageToRefer);
+            process.setPageReferenced(pageToRefer, page);
+            page.setReferencedProcess(process);
+            pageMap[page.getNumber()] = process;
+            occupiedPages.add(page);
+        }
+    }
+
+    /**
+     * Use given algorithm to find a page to swap.
+     *
+     * @return the page to swap
+     */
+    private synchronized Page findPageToSwap() {
+        final Page pageToSwap = alg.findPageToReplace(occupiedPages);
+        if (pageToSwap != null) {
+            // Found a page to swap out. Dereference the page in the process.
+            final Process referencedProcess = pageToSwap.getReferencedProcess();
+            referencedProcess.dereferencePage(pageToSwap.getReferencedPage());
+
+            return pageToSwap;
+        }
+
+        return null;
     }
 
     /**
@@ -148,13 +172,5 @@ public class Paging {
             sb.append(" ");
         }
         return sb.toString();
-    }
-    
-    public static void main(String[] args)
-    {
-    	Paging p = new Paging(100, 1,4, new FIFO());
-    	//System.out.println(p.freePagesList.size());
-       	//p.printPageMap();
-    	
     }
 }
