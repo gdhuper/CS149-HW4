@@ -47,19 +47,17 @@ public class Tester {
                     // Every 100 msec, run new job if at least 4 pages free
                     final Process p = jobQueue.getFirst();
                     // Check if a new job is arriving
-                    if (elapsedTime / 1000.0 >= p.getArrivalTime()) {
+                    if (elapsedTime / 1000.0 >= p.getArrivalTime())
                         scheduleJob(p);
-                    }
                 }
             }
-        }, 0, 100); 	 	 	
+        }, 0, 100);
     }
 
     private static synchronized void scheduleJob(Process p) {
-        System.out.println(p.getName() + " - " + p.getArrivalTime() + " : " + p.getServiceDuration());
+        System.out.println(p.getName());
         paging.executeProcess(p); //executes the process
         jobQueue.removeFirst();
-        
     }
 
     private static Process generateProcess(String name, float minArrivalTime, float maxArrivalTime) {
@@ -77,9 +75,6 @@ public class Tester {
     }
 
     private static float formatDecimal(float d, int decimalPlace) {
-        BigDecimal bd = new BigDecimal(Float.toString(d));
-        bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
-
-        return bd.floatValue();
+        return new BigDecimal(Float.toString(d)).setScale(decimalPlace, BigDecimal.ROUND_HALF_UP).floatValue();
     }
 }

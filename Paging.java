@@ -4,7 +4,6 @@ import replacementalgorithms.ReplacementAlgorithm;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Arrays;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Paging {
@@ -12,7 +11,7 @@ public class Paging {
     private int minPagesRequired;
     private ReplacementAlgorithm alg;
     private ConcurrentLinkedQueue<Page> freePagesList;
-    
+    private int runningProcessCount;
     private Process[] pageMap;
 
     public Paging(int memorySize, int pageSize, int minPagesRequired, ReplacementAlgorithm alg) {
@@ -21,7 +20,8 @@ public class Paging {
 
         final int pagesCount = memorySize / pageSize;
         freePagesList = new ConcurrentLinkedQueue<>();
-        pageMap = new Process[pagesCount]; //array to keep track of processes 
+        pageMap = new Process[pagesCount]; //array to keep track of processes
+        runningProcessCount = 0;
 
         // Initialize free pages
         for (int i = 0; i < pagesCount; i++)
@@ -35,6 +35,8 @@ public class Paging {
      */
     public boolean isFull() {
         return freePagesList.size() < minPagesRequired;
+//        System.out.println(minPagesRequired * runningProcessCount + "\n" + freePagesList.size() / minPagesRequired);
+//        return minPagesRequired * runningProcessCount >= freePagesList.size() / minPagesRequired;
     }
 
     /**
@@ -57,13 +59,14 @@ public class Paging {
                 if (elapsedTime >= p.getServiceDuration() * 1000) {
                     // Process is finished
                     System.err.println(p.getName() + " terminating after " + elapsedTime / 1000 + " seconds");
-//                    for (int i = 0; i < p.getPageCount(); i++) {
-//                        final Page unreferencedPage = p.dereferencePage(i);
-//                        if (unreferencedPage != null) {
-//                            pageMap[unreferencedPage.getNumber()] = null;
-//                            freePagesList.add(unreferencedPage);
-//                        }
-//                    }
+                    for (int i = 0; i < p.getPageCount(); i++) {
+                        final Page unreferencedPage = p.dereferencePage(i);
+                        if (unreferencedPage != null) {
+                            pageMap[unreferencedPage.getNumber()] = null;
+                            freePagesList.add(unreferencedPage);
+                        }
+                    }
+                    runningProcessCount--;
                     timer.cancel();
                 } else {
                     //Every 100 msec make a memory reference to another page in that process
@@ -83,6 +86,7 @@ public class Paging {
             final Page page = freePagesList.remove();
             p.setPageReferenced(0, page);
             pageMap[page.getNumber()] = p;
+            runningProcessCount++;
         }
     }
 
@@ -95,8 +99,7 @@ public class Paging {
         final int i = localityRef(p.getPageCount()); // gets next random index to its page reference
 
         // Return if already referenced
-        if (p.isPageReferenced(i))
-            return;
+        if (p.isPageReferenced(i)) return;
 
         if (!freePagesList.isEmpty()) {
             // Free pages available
@@ -108,10 +111,10 @@ public class Paging {
             System.out.println("NO more free pages! waiting for free page...");
             //this is where swapping algorithm goes
            
-            freePagesList.add(new Page(0, 1));
-            final Page page =  freePagesList.remove();
-            p.setPageReferenced(i, page);
-            pageMap[0] = p;
+//            freePagesList.add(new Page(0, 1));
+//            final Page page =  freePagesList.remove();
+//            p.setPageReferenced(i, page);
+//            pageMap[0] = p;
         }
     }
 

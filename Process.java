@@ -5,9 +5,7 @@ import java.util.LinkedList;
  */
 public class Process implements Comparable<Process> {
 
-    public static final float MIN_RUNTIME = (float) 0.1;
-    public static final float MAX_RUNTIME = 10;
-    private String name; //changed name type from char to STring
+    private String name;
     private float arrivalTime;
     private float serviceDuration;
     private int pageCount;
@@ -35,15 +33,27 @@ public class Process implements Comparable<Process> {
         return false;
     }
 
+    /**
+     * Set specified page of this process as referenced in main memory
+     * @param i the page to reference
+     * @param p the page in main memory
+     */
     public void setPageReferenced(int i, Page p) {
         p.setReferencedPage(i);
         pages.add(p);
     }
 
+    /**
+     * Dereference specified page from this process.
+     * @param i the page to dereference
+     * @return the unreferenced page
+     */
     public Page dereferencePage(int i) {
         for (Page p : pages) {
-            if (p.getReferencedPage() == i)
+            if (p.getReferencedPage() == i) {
+                p.setReferencedPage(-1);
                 return p;
+            }
         }
         return null;
     }
