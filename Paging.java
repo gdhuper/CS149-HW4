@@ -12,13 +12,15 @@ public class Paging {
     private ReplacementAlgorithm alg;
     private ConcurrentLinkedQueue<Page> freePagesList;
     private int runningProcessCount;
+    private int pagesCount;
     private Process[] pageMap;
 
     public Paging(int memorySize, int pageSize, int minPagesRequired, ReplacementAlgorithm alg) {
         this.minPagesRequired = minPagesRequired;
         this.alg = alg;
 
-        final int pagesCount = memorySize / pageSize;
+//        final int pagesCount = memorySize / pageSize;
+        pagesCount = memorySize / pageSize;
         freePagesList = new ConcurrentLinkedQueue<>();
         pageMap = new Process[pagesCount]; //array to keep track of processes
         runningProcessCount = 0;
@@ -34,9 +36,8 @@ public class Paging {
      * @return whether there are at least specified minimum free pages
      */
     public boolean isFull() {
-        return freePagesList.size() < minPagesRequired;
-//        System.out.println(minPagesRequired * runningProcessCount + "\n" + freePagesList.size() / minPagesRequired);
-//        return minPagesRequired * runningProcessCount >= freePagesList.size() / minPagesRequired;
+//        return freePagesList.size() < minPagesRequired;
+        return minPagesRequired * runningProcessCount >= pagesCount;
     }
 
     /**
@@ -59,13 +60,6 @@ public class Paging {
                 if (elapsedTime >= p.getServiceDuration() * 1000) {
                     // Process is finished
                     System.err.println(p.getName() + " terminating after " + elapsedTime / 1000 + " seconds");
-                    for (int i = 0; i < p.getPageCount(); i++) {
-                        final Page unreferencedPage = p.dereferencePage(i);
-                        if (unreferencedPage != null) {
-                            pageMap[unreferencedPage.getNumber()] = null;
-                            freePagesList.add(unreferencedPage);
-                        }
-                    }
                     runningProcessCount--;
                     timer.cancel();
                 } else {
