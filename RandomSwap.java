@@ -7,6 +7,8 @@ public class RandomSwap implements ReplacementAlgorithm {
 
 	@Override
 	public Page findPageToReplace(List<Page> occupiedPages) {
+		if (occupiedPages.isEmpty()) return null;
+
 		return occupiedPages.remove(random.nextInt(occupiedPages.size()));
 	}
 }

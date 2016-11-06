@@ -16,47 +16,22 @@ public class Tester {
 
     private static final Random random = new Random();
 
-    private static LinkedList<Process> jobQueue;
-    private static Paging paging;
-
     public static void main(String args[]) {
-        jobQueue = new LinkedList<>();
+        final LinkedList<Process> jobQueue = new LinkedList<>();
         for (int i = 0; i < MAX_JOBS; i++) {
             jobQueue.add(generateProcess("P" + i, MIN_ARRIVAL_TIME, MAX_ARRIVAL_TIME));
         }
         Collections.sort(jobQueue, Process::compareTo);
 
-        paging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new FIFO());
-
         final Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            final long t0 = System.currentTimeMillis();
 
-            @Override
-            public void run() {
-                final long elapsedTime = System.currentTimeMillis() - t0;
+        final Paging FIFOPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new FIFO());
+        timer.schedule(new JobScheduler(timer, FIFOPaging, jobQueue), 0, 100);
 
-                if (elapsedTime >= MAX_ARRIVAL_TIME * 1000 || jobQueue.isEmpty()) {
-                    // Cancel after 1 minute (60 * 1000 msec)
-                    timer.cancel();
-                    System.out.println("Total Number of processes finished: " + paging.getFinishedProcessCount());
-                    System.out.println("Processes Missed: " + (150- paging.getFinishedProcessCount()));
-                    // Exit here to stop all other threads
-                    System.exit(0);
-                } else if (!paging.isFull()) {
-                    // Every 100 msec, run new job if at least 4 pages free
-                    final Process p = jobQueue.getFirst();
-                    // Check if a new job is arriving
-                    if (elapsedTime / 1000.0 >= p.getArrivalTime()) {
-                        System.out.printf("%s (SIZE: %d, DURATION: %.0f) ENTER: %.2fsec\n%s\n",
-                                p.getName(), p.getPageCount(), p.getServiceDuration(), elapsedTime / 1000.0,
-                                paging.toString());
-                        paging.executeProcess(p, elapsedTime); //executes the process
-                        jobQueue.removeFirst();
-                    }
-                }
-            }
-        }, 0, 100);
+        final Paging RandomPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new RandomSwap());
+        final Paging LFUPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new LFU());
+        final Paging MFUPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new MFU());
+        final Paging LRUPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new LRU());
     }
 
     private static Process generateProcess(String name, float minArrivalTime, float maxArrivalTime) {
@@ -75,5 +50,48 @@ public class Tester {
 
     private static float formatDecimal(float d, int decimalPlace) {
         return new BigDecimal(Float.toString(d)).setScale(decimalPlace, BigDecimal.ROUND_HALF_UP).floatValue();
+    }
+
+    private static class JobScheduler extends TimerTask {
+
+        final long t0 = System.currentTimeMillis();
+        final Timer timer;
+        final Paging paging;
+        final LinkedList<Process> jobQueue;
+
+        JobScheduler(Timer timer, Paging paging, LinkedList<Process> jobQueue) {
+            this.timer = timer;
+            this.paging = paging;
+            this.jobQueue = jobQueue;
+        }
+
+        @Override
+        public void run() {
+            final long elapsedTime = System.currentTimeMillis() - t0;
+
+            if (elapsedTime >= MAX_ARRIVAL_TIME * 1000 || jobQueue.isEmpty()) {
+                // Cancel after 1 minute (60 * 1000 msec)
+                timer.cancel();
+                timer.purge();
+
+                System.out.println("Total Number of processes finished: " + paging.getFinishedProcessCount());
+                System.out.println("Processes Missed: " + (150- paging.getFinishedProcessCount()));
+
+                // Exit here to stop all other threads
+                System.exit(0);
+            } else if (!paging.isFull()) {
+                // Every 100 msec, run new job if at least 4 pages free
+                final Process p = jobQueue.getFirst();
+
+                // Check if a new job is arriving
+                if (elapsedTime / 1000.0 >= p.getArrivalTime()) {
+                    System.out.printf("%s (SIZE: %d, DURATION: %.0f) ENTER: %.2fsec\n%s\n",
+                            p.getName(), p.getPageCount(), p.getServiceDuration(), elapsedTime / 1000.0,
+                            paging.toString());
+                    paging.executeProcess(p, elapsedTime); //executes the process
+                    jobQueue.removeFirst();
+                }
+            }
+        }
     }
 }

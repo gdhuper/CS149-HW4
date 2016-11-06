@@ -27,26 +27,29 @@ public class Process implements Comparable<Process> {
         return name;
     }
 
-    public boolean isPageReferenced(int i) {
+    /**
+     * Checks if page has already been referenced.
+     * @param pageNumber the page to check
+     * @return whether page is referenced
+     */
+    public boolean isPageReferenced(int pageNumber) {
         for (Page p : pages) {
-            if (p.getReferencedPage() == i)
+            if (p.getReferencedPage() == pageNumber)
                 return true;
         }
         return false;
     }
-    
-    
 
     /**
      * Set specified page of this process as referenced in main memory
      *
-     * @param i the page to reference
-     * @param p the page in main memory
+     * @param pageToRefer the page to reference
+     * @param page the page in main memory
      */
-    public void setPageReferenced(int i, Page p) {
-        p.setReferencedPage(i);
-        pages.add(p);
-        setLastReferenced(p);
+    public void setPageReferenced(int pageToRefer, Page page) {
+        page.setReferencedPage(pageToRefer);
+        pages.add(page);
+        setLastReferenced(page);
     }
 
     /**
@@ -61,7 +64,6 @@ public class Process implements Comparable<Process> {
             }
         }
     }
-    
     
     public void setLastReferenced(Page p)
     {
@@ -84,18 +86,10 @@ public class Process implements Comparable<Process> {
         return pageCount;
     }
 
-    public void printList(LinkedList<Process> list) {
-        System.out.printf("%5s%20s%20s%25s%n", "Process Name", "Size (in pages)", "Arrival Time ", "Service Duration(secs)");
-
-        for (Process p : list) {
-            System.out.printf("%5s%20s%20s%20s%n", p.getName(), p.getPageCount(), p.getArrivalTime(), p.getServiceDuration());
-
-        }
-    }
-
     @Override
     public String toString() {
-        return "ProcessName: \n" + this.getName() + "\nSize (in pages):\n" + this.pageCount + "\nArrival Time:\n" + this.getArrivalTime() + "\nService duration:\n" + this.serviceDuration;
+        return "ProcessName: \n" + this.getName() + "\nSize (in pages):\n" + this.pageCount + "\nArrival Time:\n"
+                + this.getArrivalTime() + "\nService duration:\n" + this.serviceDuration;
     }
 
     @Override
