@@ -14,6 +14,9 @@ public class Paging {
     private final int pagesCount;
     private final Process[] pageMap;
     private int runningProcessCount;
+    private int finishedProcessCount;
+    private  int initialIdx = 0;
+   
 
     public Paging(int memorySize, int pageSize, int minPagesRequired, ReplacementAlgorithm alg) {
         this.minPagesRequired = minPagesRequired;
@@ -23,6 +26,8 @@ public class Paging {
         freePagesList = new ConcurrentLinkedQueue<>();
         pageMap = new Process[pagesCount]; // array to keep track of processes
         runningProcessCount = 0;
+        finishedProcessCount = 0; //keep track of finished processes
+        initialIdx = 0;
 
         // Initialize free pages
         for (int i = 0; i < pagesCount; i++)
@@ -38,6 +43,12 @@ public class Paging {
     public boolean isFull() {
         return minPagesRequired * runningProcessCount >= pagesCount;
     }
+    
+    
+    public int getFinishedProcessCount()
+    {
+    	return this.finishedProcessCount;
+    }
 
     /**
      * Execute process for its provided duration. Create a new thread for each process.
@@ -46,7 +57,14 @@ public class Paging {
      * @param startTime the start time of the process
      */
     public void executeProcess(Process p, float startTime) {
+    	if(freePagesList.size() >= 4)
+    	{
         initializeProcess(p);
+    	}
+    	else if(freePagesList.isEmpty())
+    	{
+    		freePagesAndInitializeProcess(p);
+    	}
 
         final Timer timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -63,10 +81,12 @@ public class Paging {
                             p.getName(), p.getPageCount(), p.getServiceDuration(), (startTime + elapsedTime) / 1000.0,
                             Paging.this.toString());
                     runningProcessCount--;
+                    finishedProcessCount++;
                     timer.cancel();
                 } else {
                     // Every 100 msec make a memory reference to another page in that process
                     referencePage(p);
+                    
                 }
             }
         }, 0, 100);
@@ -84,7 +104,51 @@ public class Paging {
             pageMap[page.getNumber()] = p;
             runningProcessCount++;
         }
+       
     }
+    
+    /**
+     * Checking swapping by hardcoding FIFO
+     * adds 4 new pages to freepagesList and initializes the process
+     * @param p
+     */
+    private synchronized void freePagesAndInitializeProcess(Process p)
+    {
+    	System.out.println("Freeing pages from memory..");
+    	for(int i = 0; i < 4; i++)
+    	{
+    		
+    		 freePagesList.add(new Page(i, 1));
+    	}
+    	final Page page = freePagesList.remove();
+        p.setPageReferenced(0, page);
+        if(initialIdx < 100){
+        pageMap[initialIdx] = p;
+        }
+        else{
+        incrementCount(); //Increments the index at which next page in pageMap is to be removed
+        pageMap[initialIdx] = p;
+        }
+        runningProcessCount++;
+    
+    }
+    
+    
+    /*
+     * Helper method to increment the index at which next page in pageMap is to be removed
+     * Testing FIFO by Hardcoding
+     */
+    private  synchronized void incrementCount() {
+    	if(initialIdx == 100)
+        {
+        	initialIdx = 0;
+        }else
+        {
+        initialIdx++;
+        }
+    	
+    }
+
 
     /** 
      * Reference page from freePagesList if not already referenced. Synchronized to prevent race conditions.
@@ -99,18 +163,19 @@ public class Paging {
 
         if (!freePagesList.isEmpty()) {
             // Free pages available
-            System.out.println("Referencing page for " + p.getName() + ": " + pageToRefer);
-            final Page page = freePagesList.remove();
+          
+            final	 	 Page page = freePagesList.remove();
             p.setPageReferenced(pageToRefer, page);
             pageMap[page.getNumber()] = p;
+            System.out.println("Referencing page for " + p.getName() + ": " + pageToRefer);
         } else {
             System.out.println("NO more free pages! waiting for free page...");
             //this is where swapping algorithm goes
            
-//            freePagesList.add(new Page(0, 1));
-//            final Page page =  freePagesList.remove();
-//            p.setPageReferenced(i, page);
-//            pageMap[0] = p;
+         //  freePagesList.add(new Page(0, 1));
+         //  final Page page =  freePagesList.remove();
+         //  p.setPageReferenced(pageToRefer, page);
+         //   pageMap[0] = p;
         }
     }
 

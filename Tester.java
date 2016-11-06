@@ -41,6 +41,7 @@ public class Tester {
                 if (elapsedTime >= MAX_ARRIVAL_TIME * 1000 || jobQueue.isEmpty()) {
                     // Cancel after 1 minute (60 * 1000 msec)
                     timer.cancel();
+                    System.out.println("Total Number of processes finished: " + paging.getFinishedProcessCount());
                     // Exit here to stop all other threads
                     System.exit(0);
                 } else if (!paging.isFull()) {
@@ -49,7 +50,7 @@ public class Tester {
                     // Check if a new job is arriving
                     if (elapsedTime / 1000.0 >= p.getArrivalTime()) {
                         System.out.printf("%s (SIZE: %d, DURATION: %.0f) ENTER: %.2fsec\n%s",
-                                p.getName(), p.getPageCount(), p.getServiceDuration(), elapsedTime / 1000.0,
+                                p.getName(), p.getPageCount(),  p.getServiceDuration(), elapsedTime / 1000.0,
                                 paging.toString());
                         paging.executeProcess(p, elapsedTime); //executes the process
                         jobQueue.removeFirst();

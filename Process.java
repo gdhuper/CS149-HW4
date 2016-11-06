@@ -10,12 +10,14 @@ public class Process implements Comparable<Process> {
     private final float serviceDuration;
     private final int pageCount;
     private final LinkedList<Page> pages;
+    private Page lastReferenced;
 
     public Process(String name, int pageCount, float arrivalTime, int serviceDuration) {
         this.name = name;
         this.arrivalTime = arrivalTime;
         this.pageCount = pageCount;
         this.serviceDuration = serviceDuration;
+        this.lastReferenced = null;
 
         // Initialize pages list
         pages = new LinkedList<>();
@@ -32,6 +34,8 @@ public class Process implements Comparable<Process> {
         }
         return false;
     }
+    
+    
 
     /**
      * Set specified page of this process as referenced in main memory
@@ -41,6 +45,7 @@ public class Process implements Comparable<Process> {
     public void setPageReferenced(int i, Page p) {
         p.setReferencedPage(i);
         pages.add(p);
+        setLastReferenced(p);
     }
 
     /**
@@ -56,6 +61,16 @@ public class Process implements Comparable<Process> {
             }
         }
         return null;
+    }
+    
+    
+    public void setLastReferenced(Page p)
+    {
+    	this.lastReferenced = p;
+    }
+    public Page getLastReferenced()
+    {
+    	return this.lastReferenced;
     }
 
     public float getArrivalTime() {
