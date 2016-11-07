@@ -3,6 +3,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Paging {
 
+    private static final int[] DELTA_I = { -1, 0, 1 };
+
     private final int minPagesRequired;
     private final int pagesCount;
     private final ReplacementAlgorithm alg;
@@ -10,6 +12,7 @@ public class Paging {
     private final ConcurrentLinkedQueue<Page> freePagesList;
     private final List<Process> runningProcesses;
     private final List<Page> occupiedPagesList;
+    private final Random random = new Random();
 
     private int finishedProcessCount;
 
@@ -90,17 +93,16 @@ public class Paging {
         Page page = freePagesList.isEmpty() ? findPageToSwap() : freePagesList.remove();
 
         if (page != null) {
+            System.out.println("Referencing page for " + process.getName() + ": 0");
             process.setPageReferenced(0, page);
             page.setReferencedProcess(process);
             // Add process to page map
-            synchronized (pageMap) {
-                pageMap[page.getNumber()] = process;
-            }
+            updatePageMap(page.getNumber(), process);
+            System.out.println(this.toString());
 
             occupiedPagesList.add(page);
             runningProcesses.add(process);
         }
-       
     }
 
     /**
@@ -109,10 +111,10 @@ public class Paging {
      * @param process the process to reference a new page for
      */
     private synchronized void referencePage(Process process) {
-        final int pageToRefer = localityRef(process.getPageCount()); // gets next random index to its page reference
+        final int pageToRefer = localityRef(process.getPageCount(), process.getLastReferencedPage());
 
-        // Return if already referenced
-        if (process.isPageReferenced(pageToRefer)) return;
+        // Attempt to access the page of the process. Returns false if page is not in memory.
+        if (process.accessPage(pageToRefer)) return;
 
         // Get page from freePagesList or find a page to swap out
         Page page = freePagesList.isEmpty() ? findPageToSwap() : freePagesList.remove();
@@ -122,9 +124,8 @@ public class Paging {
             process.setPageReferenced(pageToRefer, page);
             page.setReferencedProcess(process);
             // Add process to page map
-            synchronized (pageMap) {
-                pageMap[page.getNumber()] = process;
-            }
+            updatePageMap(page.getNumber(), process);
+            System.out.println(this.toString());
 
             occupiedPagesList.add(page);
         }
@@ -142,9 +143,8 @@ public class Paging {
             final Process referencedProcess = pageToSwap.getReferencedProcess();
             referencedProcess.dereferencePage(pageToSwap.getReferencedPage());
             // Remove process from page map
-            synchronized (pageMap) {
-                pageMap[pageToSwap.getNumber()] = null;
-            }
+            updatePageMap(pageToSwap.getNumber(), null);
+            System.out.println(this.toString());
 
             return pageToSwap;
         }
@@ -155,23 +155,32 @@ public class Paging {
     /**
      * Helper method to make random reference to the pages of a process
      *
-     * @param pageSize the size of process
      * @return index of next
      */
-    private int localityRef(int pageSize) {
-        int nextIdx = 0;
-        
-        Random random = new Random();
-        int r = random.nextInt(pageSize);
-        int[] deltaIs = {0, 1};
-        if (r >= 0 && r < (pageSize - minPagesRequired)) {
-            int deltaIdx = random.nextInt(2);
-            nextIdx = deltaIs[deltaIdx];
-        } else if (r >= (pageSize - minPagesRequired) && r < pageSize - 1) {
-            nextIdx = random.nextInt(pageSize - 1) + 2;
+    private int localityRef(int pagesCount, int lastReferencedPage) {
+        int nextPage;
+
+        final int r = random.nextInt(10);
+
+        // 70% chance change is -1, 0, 1
+        if (r >= 0 && r < 7) {
+            final int delta = DELTA_I[random.nextInt(3)];
+            nextPage = (delta + lastReferencedPage) % pagesCount;
+
+            if (nextPage == -1)
+                nextPage = pagesCount - 1;
+        } else {
+            // Else change in i is 2 to process page count (exclusive)
+            nextPage = (random.nextInt(pagesCount) + 2) % pagesCount;
         }
 
-        return nextIdx;
+        return nextPage;
+    }
+
+    private void updatePageMap(int pageNumber, Process process) {
+        synchronized (pageMap) {
+            pageMap[pageNumber] = process;
+        }
     }
 
     @Override
@@ -189,11 +198,5 @@ public class Paging {
         }
 
         return sb.toString();
-    }
-
-    public void printOccupied() {
-    	for(Page p: occupiedPagesList) {
-    		System.out.println(p.getReferencedProcess());
-    	}
     }
 }

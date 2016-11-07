@@ -10,14 +10,14 @@ public class Process implements Comparable<Process> {
     private final float serviceDuration;
     private final int pageCount;
     private final LinkedList<Page> pages;
-    private Page lastReferenced;
+    private int lastReferencedPage;
 
     public Process(String name, int pageCount, float arrivalTime, int serviceDuration) {
         this.name = name;
         this.arrivalTime = arrivalTime;
         this.pageCount = pageCount;
         this.serviceDuration = serviceDuration;
-        this.lastReferenced = null;
+        this.lastReferencedPage = -1;
 
         // Initialize pages list
         pages = new LinkedList<>();
@@ -28,14 +28,16 @@ public class Process implements Comparable<Process> {
     }
 
     /**
-     * Checks if page has already been referenced.
+     * Attempt to access page. Increment use count if no page fault.
      * @param pageNumber the page to check
      * @return whether page is referenced
      */
-    public boolean isPageReferenced(int pageNumber) {
+    public boolean accessPage(int pageNumber) {
         for (Page p : pages) {
-            if (p.getReferencedPage() == pageNumber)
+            if (p.getReferencedPage() == pageNumber) {
+                p.incrementUseCount();
                 return true;
+            }
         }
         return false;
     }
@@ -49,7 +51,7 @@ public class Process implements Comparable<Process> {
     public void setPageReferenced(int pageToRefer, Page page) {
         page.setReferencedPage(pageToRefer);
         pages.add(page);
-        setLastReferenced(page);
+        setLastReferencedPage(pageToRefer);
     }
 
     /**
@@ -65,13 +67,11 @@ public class Process implements Comparable<Process> {
         }
     }
     
-    public void setLastReferenced(Page p)
-    {
-    	this.lastReferenced = p;
+    public void setLastReferencedPage(int pageNumber) {
+    	this.lastReferencedPage = pageNumber;
     }
-    public Page getLastReferenced()
-    {
-    	return this.lastReferenced;
+    public int getLastReferencedPage() {
+    	return this.lastReferencedPage;
     }
 
     public float getArrivalTime() {
