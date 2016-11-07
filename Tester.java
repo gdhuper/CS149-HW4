@@ -31,7 +31,7 @@ public class Tester {
         final Paging MFUPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new MFU());
         final Paging LRUPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new LRU());
 
-        timer.schedule(new JobScheduler(timer, MFUPaging, jobQueue), 0, 100);
+        timer.schedule(new JobScheduler(timer, FIFOPaging, jobQueue), 0, 100);
     }
 
     private static Process generateProcess(String name, float minArrivalTime, float maxArrivalTime) {
@@ -68,7 +68,7 @@ public class Tester {
         @Override
         public void run() {
             final long elapsedTime = System.currentTimeMillis() - t0;
-
+            
             if (elapsedTime >= MAX_ARRIVAL_TIME * 1000 || jobQueue.isEmpty()) {
                 // Cancel after 1 minute (60 * 1000 msec)
                 timer.cancel();

@@ -124,8 +124,14 @@ public class Paging {
             // Add process to page map
             updatePageMap(page.getNumber(), process);
             System.out.println(this.toString());
-
-            occupiedPagesList.add(page);
+            
+            if(page.getIdxLRU() != -1) //if LRU is used as swapping algorithm
+            {
+            	occupiedPagesList.set(page.getIdxLRU(), page);
+            }
+           else { //if LRU is not used as swapping algorithm 
+           	occupiedPagesList.add(page);
+           }
         }
     }
 
@@ -141,7 +147,9 @@ public class Paging {
             final Process referencedProcess = pageToSwap.getReferencedProcess();
             referencedProcess.dereferencePage(pageToSwap.getReferencedPage());
             // Remove process from page map
-            updatePageMap(pageToSwap.getNumber(), null);
+           
+            	 updatePageMap(pageToSwap.getNumber(), null);
+            
 //            System.out.println(this.toString());
 
             return pageToSwap;
@@ -150,7 +158,11 @@ public class Paging {
         return null;
     }
 
-    /**
+    public ReplacementAlgorithm getAlg() {
+		return alg;
+	}
+
+	/**
      * Helper method to make random reference to the pages of a process
      *
      * @return index of next

@@ -7,15 +7,33 @@ public class Page {
     private int referencedPage;
     private Process referencedProcess;
     private int useCount;
+    private int idxLRU;
 
     public Page(int number) {
         this.number = number;
 
         referencedPage = -1;
         useCount = 0;
+        idxLRU = -1;
     }
-
+    
     /**
+     * Returns the idx of Least recently used page
+     * @return index of LRU
+     */
+    public int getIdxLRU() {
+		return idxLRU;
+	}
+    
+    /**
+     * Sets the index of Least Recently used page
+     * @param idxLRU the index of least recently used page
+     */
+	public void setIdxLRU(int idxLRU) {
+		this.idxLRU = idxLRU;
+	}
+
+	/**
      * Gets the page number.
      * @return the page number
      */
