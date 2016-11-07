@@ -11,8 +11,11 @@ public class Paging {
     private final List<Process> runningProcesses;
     private final List<Page> occupiedPagesList;
     private final Random random = new Random();
+    private boolean childThreadFinished = false;
 
-    private int finishedProcessCount;
+   
+
+	private int finishedProcessCount;
 
     public Paging(int memorySize, int pageSize, int minPagesRequired, ReplacementAlgorithm alg) {
         this.minPagesRequired = minPagesRequired;
@@ -23,9 +26,9 @@ public class Paging {
         freePagesList = new ConcurrentLinkedQueue<>();
         runningProcesses = Collections.synchronizedList(new LinkedList<Process>());
         occupiedPagesList = Collections.synchronizedList(new LinkedList<Page>()); // List of all pages that reference some processes' page
-
+        
         finishedProcessCount = 0; //keep track of finished processes
-
+        childThreadFinished = false;
         // Initialize free pages
         for (int i = 0; i < pagesCount; i++)
             freePagesList.add(new Page(i));
@@ -45,6 +48,15 @@ public class Paging {
     public int getFinishedProcessCount() {
     	return this.finishedProcessCount;
     }
+    
+    
+    public boolean isChildThreadFinished() {
+		return childThreadFinished;
+	}
+
+	public void setChildThreadFinished(boolean childThreadFinished) {
+		this.childThreadFinished = childThreadFinished;
+	}
 
     /**
      * Execute process for its provided duration. Create a new thread for each process.
@@ -64,7 +76,7 @@ public class Paging {
                 final long elapsedTime = System.currentTimeMillis() - t0;
 
                 // Run each process for its service duration
-                if (elapsedTime >= process.getServiceDuration() * 1000) {
+                if (elapsedTime >= process.getServiceDuration() * 1000 ) {
                     // Process is finished
                     System.err.printf("%s (SIZE: %d, DURATION: %.0f) EXIT: %.2fsec\n%s\n",
                             process.getName(), process.getPageCount(), process.getServiceDuration(),
@@ -75,7 +87,13 @@ public class Paging {
                     timer.purge();
                 } else {
                     // Every 100 msec make a memory reference to another page in that process
+                	if(isChildThreadFinished() == false){
                     referencePage(process);
+                	}
+                	else
+                	{
+                		 timer.cancel(); 
+                	}
                 }
             }
         }, 0, 100);

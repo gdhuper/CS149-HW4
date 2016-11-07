@@ -31,7 +31,7 @@ public class Tester {
         final Paging MFUPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new MFU());
         final Paging LRUPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new LRU());
 
-        timer.schedule(new JobScheduler(timer, FIFOPaging, jobQueue), 0, 100);
+        timer.schedule(new JobScheduler(timer, LFUPaging, jobQueue), 0, 100);
     }
 
     private static Process generateProcess(String name, float minArrivalTime, float maxArrivalTime) {
@@ -71,6 +71,7 @@ public class Tester {
             
             if (elapsedTime >= MAX_ARRIVAL_TIME * 1000 || jobQueue.isEmpty()) {
                 // Cancel after 1 minute (60 * 1000 msec)
+            	paging.setChildThreadFinished(true);
                 timer.cancel();
                 timer.purge();
 
@@ -80,6 +81,11 @@ public class Tester {
                 // Exit here to stop all other threads
                 System.exit(0);
             } else if (!paging.isFull()) {
+            	if(paging.isChildThreadFinished() == true)
+            	{
+            		timer.cancel();
+            		System.exit(0);
+            	}
                 // Every 100 msec, run new job if at least 4 pages can be assigned to each running job
                 final Process p = jobQueue.getFirst();
 
