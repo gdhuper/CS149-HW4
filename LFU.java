@@ -4,6 +4,14 @@ public class LFU implements ReplacementAlgorithm {
 
 	@Override
 	public Page findPageToReplace(List<Page> occupiedPages) {
-		return null;
+		if (occupiedPages.isEmpty()) return null;
+
+		Page lowestUseCount = occupiedPages.get(0);
+		for (Page page : occupiedPages) {
+			if (page.getUseCount() < lowestUseCount.getUseCount())
+				lowestUseCount = page;
+		}
+		occupiedPages.remove(lowestUseCount);
+		return lowestUseCount;
 	}
 }

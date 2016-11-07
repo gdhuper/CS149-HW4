@@ -26,12 +26,12 @@ public class Tester {
         final Timer timer = new Timer();
 
         final Paging FIFOPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new FIFO());
-        timer.schedule(new JobScheduler(timer, FIFOPaging, jobQueue), 0, 100);
-
-        final Paging RandomPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new RandomSwap());
+        final Paging randomPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new RandomSwap());
         final Paging LFUPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new LFU());
         final Paging MFUPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new MFU());
         final Paging LRUPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new LRU());
+
+        timer.schedule(new JobScheduler(timer, MFUPaging, jobQueue), 0, 100);
     }
 
     private static Process generateProcess(String name, float minArrivalTime, float maxArrivalTime) {
@@ -80,7 +80,7 @@ public class Tester {
                 // Exit here to stop all other threads
                 System.exit(0);
             } else if (!paging.isFull()) {
-                // Every 100 msec, run new job if at least 4 pages free
+                // Every 100 msec, run new job if at least 4 pages can be assigned to each running job
                 final Process p = jobQueue.getFirst();
 
                 // Check if a new job is arriving

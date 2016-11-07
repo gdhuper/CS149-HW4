@@ -6,11 +6,13 @@ public class Page {
     private final int number;
     private int referencedPage;
     private Process referencedProcess;
+    private int useCount;
 
     public Page(int number) {
         this.number = number;
 
         referencedPage = -1;
+        useCount = 0;
     }
 
     /**
@@ -38,11 +40,12 @@ public class Page {
     }
 
     /**
-     * Sets the process that this page is currently referencing.
+     * Sets the process that this page is now referencing.
      * @param process the process to reference
      */
     public void setReferencedProcess(Process process) {
         this.referencedProcess = process;
+        useCount = 1;
     }
 
     /**
@@ -51,5 +54,23 @@ public class Page {
      */
     public Process getReferencedProcess() {
         return referencedProcess;
+    }
+
+    public int getUseCount() {
+        return useCount;
+    }
+
+    public void incrementUseCount() {
+        useCount++;
+    }
+
+    public boolean equals(Object o) {
+        if (!(o instanceof Page)) return false;
+
+        if (o == this) return true;
+
+        Page page = (Page) o;
+
+        return page.getNumber() == this.getNumber();
     }
 }
