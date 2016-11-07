@@ -3,8 +3,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Paging {
 
-    private static final int[] DELTA_I = { -1, 0, 1 };
-
     private final int minPagesRequired;
     private final int pagesCount;
     private final ReplacementAlgorithm alg;
@@ -144,7 +142,7 @@ public class Paging {
             referencedProcess.dereferencePage(pageToSwap.getReferencedPage());
             // Remove process from page map
             updatePageMap(pageToSwap.getNumber(), null);
-            System.out.println(this.toString());
+//            System.out.println(this.toString());
 
             return pageToSwap;
         }
@@ -164,23 +162,46 @@ public class Paging {
 
         // 70% chance change is -1, 0, 1
         if (r >= 0 && r < 7) {
-            final int delta = DELTA_I[random.nextInt(3)];
+            final int delta = random.nextInt(3) - 1;
             nextPage = (delta + lastReferencedPage) % pagesCount;
-
-            if (nextPage == -1)
-                nextPage = pagesCount - 1;
+            if (nextPage < 0)
+                nextPage += pagesCount;
         } else {
             // Else change in i is 2 to process page count (exclusive)
-            nextPage = (random.nextInt(pagesCount) + 2) % pagesCount;
+            int[] ex = { lastReferencedPage - 1, lastReferencedPage, lastReferencedPage + 1 };
+            nextPage = getRandomWithExclusion(0, pagesCount, ex);
         }
 
         return nextPage;
     }
 
+    /**
+     * Updates the page map with a process or null.
+     * @param pageNumber the page number that has been updated
+     * @param process the process or null that the now page refers to
+     */
     private void updatePageMap(int pageNumber, Process process) {
         synchronized (pageMap) {
             pageMap[pageNumber] = process;
         }
+    }
+
+    /**
+     * Get random number in range with exclusions.
+     * @param start minimum value inclusive
+     * @param end maximum value exclusive
+     * @param exclude the values to exclude
+     * @return a random number in given range excluding given values
+     */
+    private int getRandomWithExclusion(int start, int end, int... exclude) {
+        int r = start + random.nextInt(end - start - exclude.length);
+        for (int ex : exclude) {
+            if (r < ex) {
+                break;
+            }
+            r++;
+        }
+        return r;
     }
 
     @Override
