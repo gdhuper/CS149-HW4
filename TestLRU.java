@@ -3,6 +3,11 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+
+/*
+ * This is just a tester class i made for testing LRU
+ * Will remove this file before turning in HW
+ */
 public class TestLRU {
 	
 	public static List<Page> list = new ArrayList<Page>();
@@ -55,6 +60,7 @@ public class TestLRU {
 			printMap();
 			System.out.println();
 
+			
 		}
 	}
 	
