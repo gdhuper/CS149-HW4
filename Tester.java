@@ -13,6 +13,7 @@ public class Tester {
     private static final float MIN_ARRIVAL_TIME = 0;
     private static final float MAX_ARRIVAL_TIME = 60;
     private static final int[] MEMORY_SIZES = { 5, 11, 17, 31 };
+    public static  int avgProcessesFinished = 0;
 
     private static final Random random = new Random();
 
@@ -30,8 +31,12 @@ public class Tester {
         final Paging LFUPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new LFU());
         final Paging MFUPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new MFU());
         final Paging LRUPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new LRU());
-
+        
+        
         timer.schedule(new JobScheduler(timer, LFUPaging, jobQueue), 0, 100);
+        
+ 
+        System.out.println("Average number of processes finished in 5 runs: " + avgProcessesFinished/5);
     }
 
     private static Process generateProcess(String name, float minArrivalTime, float maxArrivalTime) {
@@ -74,7 +79,7 @@ public class Tester {
             	paging.setChildThreadFinished(true);
                 timer.cancel();
                 timer.purge();
-
+                avgProcessesFinished += paging.getFinishedProcessCount();
                 System.out.println("Total Number of processes finished: " + paging.getFinishedProcessCount());
                 System.out.println("Processes Missed: " + (150- paging.getFinishedProcessCount()));
 

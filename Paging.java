@@ -145,7 +145,7 @@ public class Paging {
             
             if(page.getIdxLRU() != -1) //if LRU is used as swapping algorithm
             {
-            	occupiedPagesList.set(page.getIdxLRU(), page);
+            	occupiedPagesList.set(page.getIdxLRU(), page); //setting the value of the least recently used page to new page of current process
             }
            else { //if LRU is not used as swapping algorithm 
            	occupiedPagesList.add(page);
@@ -175,10 +175,6 @@ public class Paging {
 
         return null;
     }
-
-    public ReplacementAlgorithm getAlg() {
-		return alg;
-	}
 
 	/**
      * Helper method to make random reference to the pages of a process

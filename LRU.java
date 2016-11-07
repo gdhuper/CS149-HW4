@@ -12,15 +12,15 @@ public class LRU implements ReplacementAlgorithm {
 			}
 		
 		else{
-			if(occupiedPages.size() < 100)
+			if(occupiedPages.size() < 100)   //if size < 100 start switching page at index 0 and increment index
 			{
-				int occupiedPagesIdx = leastRecentlyUsedIdx;
+				int occupiedPagesIdx = leastRecentlyUsedIdx; 
 				Page LRU = occupiedPages.get(leastRecentlyUsedIdx++);
 				LRU.setIdxLRU(occupiedPagesIdx);
 				return LRU;
 				
 			}
-			if(occupiedPages.size() == 100)
+			if(occupiedPages.size() == 100) //else if size = 100 start again from index 0
 			{
 				leastRecentlyUsedIdx = 0;
 				Page LRU = occupiedPages.get(leastRecentlyUsedIdx++);
