@@ -26,18 +26,18 @@ public class Tester {
             //creating a new paging object and adding it to pagings arraylist
             pagings.add(new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new FIFO()));
         }
-        for (int i = 0; i < 5; i++) {
-            pagings.add(new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new RandomSwap()));
-        }
-        for (int i = 0; i < 5; i++) {
-            pagings.add(new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new LFU()));
-        }
-        for (int i = 0; i < 5; i++) {
-            pagings.add(new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new MFU()));
-        }
-        for (int i = 0; i < 5; i++) {
-            pagings.add(new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new LRU()));
-        }
+//        for (int i = 0; i < 5; i++) {
+//            pagings.add(new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new RandomSwap()));
+//        }
+//        for (int i = 0; i < 5; i++) {
+//            pagings.add(new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new LFU()));
+//        }
+//        for (int i = 0; i < 5; i++) {
+//            pagings.add(new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new MFU()));
+//        }
+//        for (int i = 0; i < 5; i++) {
+//            pagings.add(new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new LRU()));
+//        }
 
         final Timer timer = new Timer();
         final LinkedList<Process> jobQueue = generateProcessesList();
@@ -108,8 +108,8 @@ public class Tester {
                 System.out.println("Total Number of processes finished: " + processesFinishedThisRun);
                 System.out.println("Processes Missed: " + processesMissedThisRun);
                 System.out.println("Total Pages in the job queue: " + totalPages);
-                System.out.println("Total Pages hit in this run: " + paging.getPagesHit());
-                System.out.println("Total Pages missed in this run: " + paging.getPagesMissed());
+                System.out.printf("Total Pages hit in this run: %.0f\n", paging.getPagesHit());
+                System.out.printf("Total Pages missed in this run: %.0f\n", paging.getPagesMissed());
                 System.out.println("Page Hit/Miss Ratio for this run: " + pagesHitMissThisRun + "\n");
 
                 if (!pagings.isEmpty()) {

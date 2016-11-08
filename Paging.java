@@ -113,7 +113,6 @@ public class Paging {
             page.setReferencedProcess(process);
             // Add process to page map
             updatePageMap(page, process);
-            System.out.println(this.toString());
 
             occupiedPagesList.add(page);
             runningProcesses.add(process);
@@ -160,7 +159,6 @@ public class Paging {
             page.setReferencedProcess(process);
             // Add process to page map
             updatePageMap(page, process);
-            System.out.println(this.toString());
 
             occupiedPagesList.add(page);
         }
@@ -187,8 +185,6 @@ public class Paging {
             referencedProcess.dereferencePage(pageToSwap.getReferencedPage());
             // Remove process from page map
             updatePageMap(pageToSwap, null);
-            
-//            System.out.println(this.toString());
 
             return pageToSwap;
         }
