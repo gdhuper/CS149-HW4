@@ -41,7 +41,8 @@ public class Tester {
 
         final Timer timer = new Timer();
         final LinkedList<Process> jobQueue = generateProcessesList();
-        timer.schedule(new JobScheduler(timer, pagings.remove(0), jobQueue, pagings.remove(0).getAlg().toString()), 0, 100);
+        Paging paging = pagings.remove(0);
+        timer.schedule(new JobScheduler(timer, paging, jobQueue, paging.getAlg().toString()), 0, 100);
     }
 
     private static LinkedList<Process> generateProcessesList() {
@@ -123,12 +124,13 @@ public class Tester {
                     }
                     final Timer newTimer = new Timer();
                     final LinkedList<Process> newJobQueue = generateProcessesList();
-                    newTimer.schedule(new JobScheduler(newTimer, pagings.remove(0), newJobQueue, pagings.remove(0).getAlg().toString()), 0, 100);
+                    Paging paging = pagings.remove(0);
+                    newTimer.schedule(new JobScheduler(newTimer, paging, newJobQueue, paging.getAlg().toString()), 0, 100);
                 } else {
                     System.out.println("Printing the stats for 5 runs using " + this.alg + " swapping algorithm");
 
-                    System.out.println("Average number of processes finished in 5 runs: " + avgProcessesFinished / 5.0);
-                    System.out.println("Average number of processes missed in 5 runs: " + avgProcessesMissed / 5.0);
+                    System.out.println("Average number of processes finished in 5 runs: " + avgProcessesFinished / 5);
+                    System.out.println("Average number of processes missed in 5 runs: " + avgProcessesMissed / 5);
                     System.out.println("Average hits/miss ratio of pages in 5 runs: " + avgPagesHitMiss / 5.0);
 
                 }
