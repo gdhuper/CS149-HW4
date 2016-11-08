@@ -10,7 +10,6 @@ public class Page {
     private int referencedPage;
     private Process referencedProcess;
     private int useCount;
-    private int idxLRU;
     private int oldestRef;
     private Timestamp time;
 
@@ -19,7 +18,6 @@ public class Page {
 
         referencedPage = -1;
         useCount = 0;
-        idxLRU = -1;
         oldestRef = -1;
         time = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
     }
@@ -40,21 +38,6 @@ public class Page {
 	public int getOldestRef()
 	{
 		return this.oldestRef;
-	}
-	/**
-     * Returns the idx of Least recently used page
-     * @return index of LRU
-     */
-    public int getIdxLRU() {
-		return idxLRU;
-	}
-    
-    /**
-     * Sets the index of Least Recently used page
-     * @param idxLRU the index of least recently used page
-     */
-	public void setIdxLRU(int idxLRU) {
-		this.idxLRU = idxLRU;
 	}
 
 	/**
@@ -88,7 +71,7 @@ public class Page {
     public void setReferencedProcess(Process process) {
         this.referencedProcess = process;
         useCount = 1;
-        incrementoldestRef();
+        incrementOldestRef();
         setTime(new java.sql.Timestamp(Calendar.getInstance().getTime().getTime()));
     }
 
@@ -108,7 +91,7 @@ public class Page {
         useCount++;
     }
     
-    public void incrementoldestRef() {
+    public void incrementOldestRef() {
     	oldestRef++;
     }
 

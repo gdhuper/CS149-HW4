@@ -12,6 +12,7 @@ public class Paging {
     private final List<Page> occupiedPagesList;
     private final Random random = new Random();
     private double pagesHit;
+    private double pagesMissed;
 	private int finishedProcessCount;
 
     public Paging(int memorySize, int pageSize, int minPagesRequired, ReplacementAlgorithm alg) {
@@ -51,7 +52,7 @@ public class Paging {
      * @param startTime the start time of the process
      */
     public void executeProcess(Process process, float startTime, float maxRunTime) {
-        initializeProcess(process);
+        initializeProcess(process, startTime);
 
         final Timer timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -75,7 +76,7 @@ public class Paging {
                     timer.cancel();
                 } else if ((startTime + elapsedTime) <= maxRunTime * 1000) {
                     // Every 100 msec make a memory reference to another page in that process
-                    referencePage(process);
+                    referencePage(process, startTime + elapsedTime);
                 }
             }
         }, 0, 100);
@@ -86,13 +87,28 @@ public class Paging {
      *
      * @param process the process to initialize
      */
-    private synchronized void initializeProcess(Process process) {
+    private synchronized void initializeProcess(Process process, float startTime) {
+        pagesMissed++;
         // Get page from freePagesList or find a page to swap out
-        Page page = freePagesList.isEmpty() ? findPageToSwap() : freePagesList.remove();
+        boolean isPagesListEmpty;
+        Page page;
+        if (isPagesListEmpty = freePagesList.isEmpty()) {
+            page = findPageToSwap();
+        } else {
+            page  = freePagesList.remove();
+        }
 
         if (page != null) {
-        	pagesHit++;
-            System.out.println("Referencing page for " + process.getName() + ": 0");
+            if (isPagesListEmpty) {
+                Process evicted = page.getReferencedProcess();
+                System.out.printf("Referencing page 0 for %s: %.2fsec, MISS, EVICT %s / %s\n",
+                        process.getName(), startTime / 1000.0, evicted.getName(),
+                        page.getNumber());
+            } else {
+                System.out.printf("Referencing page 0 for %s: %.2fsec, MISS, EVICT NONE\n",
+                        process.getName(), startTime / 1000.0);
+            }
+
             process.setPageReferenced(0, page);
             page.setReferencedProcess(process);
             // Add process to page map
@@ -109,31 +125,44 @@ public class Paging {
      *
      * @param process the process to reference a new page for
      */
-    private synchronized void referencePage(Process process) {
+    private synchronized void referencePage(Process process, float referenceTime) {
         final int pageToRefer = localityRef(process.getPageCount(), process.getLastReferencedPage());
 
         // Attempt to access the page of the process. Returns false if page is not in memory.
-        if (process.accessPage(pageToRefer)) return;
+        if (process.accessPage(pageToRefer)) {
+            pagesHit++;
+            System.out.printf("Referencing page %d for %s: %.2fsec, HIT\n",
+                    pageToRefer, process.getName(), referenceTime / 1000.0);
+            return;
+        }
+        pagesMissed++;
 
         // Get page from freePagesList or find a page to swap out
-        Page page = freePagesList.isEmpty() ? findPageToSwap() : freePagesList.remove();
+        boolean isPagesListEmpty;
+        Page page;
+        if (isPagesListEmpty = freePagesList.isEmpty()) {
+            page = findPageToSwap();
+        } else {
+            page  = freePagesList.remove();
+        }
 
         if (page != null) {
-            pagesHit++;
-            System.out.println("Referencing page for " + process.getName() + ": " + pageToRefer);
+            if (isPagesListEmpty) {
+                Process evicted = page.getReferencedProcess();
+                System.out.printf("Referencing page %d for %s: %.2fsec, MISS, EVICT %s / %s\n",
+                        pageToRefer, process.getName(), referenceTime / 1000.0, evicted.getName(),
+                        page.getNumber());
+            } else {
+                System.out.printf("Referencing page %d for %s: %.2fsec, MISS, EVICT NONE\n",
+                        page.getNumber(), process.getName(), referenceTime / 1000.0);
+            }
             process.setPageReferenced(pageToRefer, page);
             page.setReferencedProcess(process);
             // Add process to page map
             updatePageMap(page, process);
             System.out.println(this.toString());
-            
-            //if (page.getIdxLRU() != -1) //if LRU is used as swapping algorithm
-            //{
-            //	occupiedPagesList.set(page.getIdxLRU(), page); //setting the value of the least recently used page to new page of current process
-           // }
-           // else { //if LRU is not used as swapping algorithm
-           	    occupiedPagesList.add(page);
-           // }
+
+            occupiedPagesList.add(page);
         }
     }
 
@@ -141,9 +170,9 @@ public class Paging {
 		return pagesHit;
 	}
 
-	public void setPagesHit(double pagesHit) {
-		this.pagesHit = pagesHit;
-	}
+	public double getPagesMissed() {
+        return pagesMissed;
+    }
 
 	/**
      * Use given algorithm to find a page to swap. If found, dereference page from process and update map.

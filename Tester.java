@@ -100,22 +100,20 @@ public class Tester {
                 timer.cancel();
                 final int processesFinishedThisRun = paging.getFinishedProcessCount();
                 avgProcessesFinished += processesFinishedThisRun;
-                final int processesMissedThisRun = (150 - paging.getFinishedProcessCount());
+                final int processesMissedThisRun = (MAX_JOBS - paging.getFinishedProcessCount());
                 avgProcessesMissed += processesMissedThisRun;
-                final double pagesHitMissThisRun = paging.getPagesHit() / (totalPages - paging.getPagesHit());
+                final double pagesHitMissThisRun = paging.getPagesHit() / paging.getPagesMissed();
                 avgPagesHitMiss += pagesHitMissThisRun;
 
                 System.out.println("Total Number of processes finished: " + processesFinishedThisRun);
                 System.out.println("Processes Missed: " + processesMissedThisRun);
-                System.out.println("Total Pages in the job queue combined: " + totalPages);
+                System.out.println("Total Pages in the job queue: " + totalPages);
                 System.out.println("Total Pages hit in this run: " + paging.getPagesHit());
-                System.out.println("Total Pages missed in this run: " + (totalPages - paging.getPagesHit()));
+                System.out.println("Total Pages missed in this run: " + paging.getPagesMissed());
                 System.out.println("Page Hit/Miss Ratio for this run: " + pagesHitMissThisRun + "\n");
 
-                algRunCount++;
-
                 if (!pagings.isEmpty()) {
-                    if (algRunCount == 5) {
+                    if (++algRunCount == 5) {
                         algRunCount = 0;
                         avgPagesHitMiss = 0;
                         avgProcessesFinished = 0;
