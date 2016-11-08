@@ -34,9 +34,6 @@ public class Tester {
         
         
         timer.schedule(new JobScheduler(timer, LFUPaging, jobQueue), 0, 100);
-        
- 
-        System.out.println("Average number of processes finished in 5 runs: " + avgProcessesFinished/5);
     }
 
     private static Process generateProcess(String name, float minArrivalTime, float maxArrivalTime) {
@@ -77,9 +74,10 @@ public class Tester {
             if (elapsedTime >= MAX_ARRIVAL_TIME * 1000 || jobQueue.isEmpty()) {
                 // Cancel after 1 minute (60 * 1000 msec)
             	paging.setChildThreadFinished(true);
+            	
                 timer.cancel();
                 timer.purge();
-                avgProcessesFinished += paging.getFinishedProcessCount();
+                
                 System.out.println("Total Number of processes finished: " + paging.getFinishedProcessCount());
                 System.out.println("Processes Missed: " + (150- paging.getFinishedProcessCount()));
 

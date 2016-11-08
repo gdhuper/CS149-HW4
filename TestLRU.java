@@ -18,7 +18,7 @@ public class TestLRU {
 	public static void main(String[] args)
 	{
 		
-		for(int i = 1; i <= 150; i++)
+		for(int i = 1; i <= 200; i++)
 		{
 			list.add(new Page(i));
 		}
