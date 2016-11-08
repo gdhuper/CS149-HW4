@@ -13,14 +13,18 @@ public class Tester {
     private static final float MIN_ARRIVAL_TIME = 0;
     private static final float MAX_ARRIVAL_TIME = 60;
     private static final int[] MEMORY_SIZES = { 5, 11, 17, 31 };
-    public static  int avgProcessesFinished = 0;
+    private static int avgProcessesFinished = 0;
 
     private static final Random random = new Random();
 
     public static void main(String args[]) {
         final LinkedList<Process> jobQueue = new LinkedList<>();
         for (int i = 0; i < MAX_JOBS; i++) {
-            jobQueue.add(generateProcess("P" + i, MIN_ARRIVAL_TIME, MAX_ARRIVAL_TIME));
+            char name = (char) ('!' + i);
+            if (name == '.') {
+                name = (char) ('!' + ++i);
+            }
+            jobQueue.add(generateProcess(name, MIN_ARRIVAL_TIME, MAX_ARRIVAL_TIME));
         }
         Collections.sort(jobQueue, Process::compareTo);
 
@@ -31,12 +35,11 @@ public class Tester {
         final Paging LFUPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new LFU());
         final Paging MFUPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new MFU());
         final Paging LRUPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new LRU());
-        
-        
-        timer.schedule(new JobScheduler(timer, LFUPaging, jobQueue), 0, 100);
+
+        timer.schedule(new JobScheduler(timer, FIFOPaging, jobQueue), 0, 100);
     }
 
-    private static Process generateProcess(String name, float minArrivalTime, float maxArrivalTime) {
+    private static Process generateProcess(char name, float minArrivalTime, float maxArrivalTime) {
         float arrivalTime = nextRandomFloat(minArrivalTime, maxArrivalTime);
         arrivalTime = formatDecimal(arrivalTime, 2);
 
@@ -70,25 +73,16 @@ public class Tester {
         @Override
         public void run() {
             final long elapsedTime = System.currentTimeMillis() - t0;
-            
-            if (elapsedTime >= MAX_ARRIVAL_TIME * 1000 || jobQueue.isEmpty()) {
+
+            if (elapsedTime >= MAX_ARRIVAL_TIME * 1000) {
                 // Cancel after 1 minute (60 * 1000 msec)
-            	paging.setChildThreadFinished(true);
-            	
+            	paging.stopExecution();
                 timer.cancel();
-                timer.purge();
-                
+                avgProcessesFinished += paging.getFinishedProcessCount();
                 System.out.println("Total Number of processes finished: " + paging.getFinishedProcessCount());
                 System.out.println("Processes Missed: " + (150- paging.getFinishedProcessCount()));
-
-                // Exit here to stop all other threads
-                System.exit(0);
-            } else if (!paging.isFull()) {
-            	if(paging.isChildThreadFinished() == true)
-            	{
-            		timer.cancel();
-            		System.exit(0);
-            	}
+                System.out.println("Average number of processes finished in 5 runs: " + avgProcessesFinished / 5);
+            } else if (!paging.isFull() && !jobQueue.isEmpty()) {
                 // Every 100 msec, run new job if at least 4 pages can be assigned to each running job
                 final Process p = jobQueue.getFirst();
 

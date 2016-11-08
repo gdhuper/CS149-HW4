@@ -5,14 +5,14 @@ import java.util.LinkedList;
  */
 public class Process implements Comparable<Process> {
 
-    private final String name;
+    private final char name;
     private final float arrivalTime;
     private final float serviceDuration;
     private final int pageCount;
     private final LinkedList<Page> pages;
     private int lastReferencedPage;
 
-    public Process(String name, int pageCount, float arrivalTime, int serviceDuration) {
+    public Process(char name, int pageCount, float arrivalTime, int serviceDuration) {
         this.name = name;
         this.arrivalTime = arrivalTime;
         this.pageCount = pageCount;
@@ -23,7 +23,7 @@ public class Process implements Comparable<Process> {
         pages = new LinkedList<>();
     }
 
-    public String getName() {
+    public char getName() {
         return name;
     }
 
@@ -103,6 +103,6 @@ public class Process implements Comparable<Process> {
             return false;
 
         Process p = (Process) o;
-        return this.name.equals(p.getName());
+        return this.name == p.getName();
     }
 }
