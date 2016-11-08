@@ -14,4 +14,10 @@ public class LFU implements ReplacementAlgorithm {
 		occupiedPages.remove(lowestUseCount);
 		return lowestUseCount;
 	}
+
+	@Override
+	public String toString() {
+		return "LFU";
+	}
+	
 }

@@ -2,6 +2,8 @@ import java.util.List;
 
 public class MFU implements ReplacementAlgorithm {
 
+	
+
 	@Override
 	public Page findPageToReplace(List<Page> occupiedPages) {
 		if (occupiedPages.isEmpty()) return null;
@@ -13,5 +15,11 @@ public class MFU implements ReplacementAlgorithm {
 		}
 		occupiedPages.remove(highestUseCount);
 		return highestUseCount;
+	}
+	
+	
+	@Override
+	public String toString() {
+		return "MFU";
 	}
 }

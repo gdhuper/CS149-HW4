@@ -28,4 +28,10 @@ public class LRU implements ReplacementAlgorithm {
 		
 	}
 
+	@Override
+	public String toString() {
+		return "LRU";
+	}
+	
+
 }

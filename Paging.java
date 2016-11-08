@@ -119,7 +119,11 @@ public class Paging {
         }
     }
 
-    /**
+    public ReplacementAlgorithm getAlg() {
+		return alg;
+	}
+
+	/**
      * Reference page from freePagesList if not already referenced. Synchronized to prevent race conditions.
      *
      * @param process the process to reference a new page for

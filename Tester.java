@@ -41,7 +41,7 @@ public class Tester {
 
         final Timer timer = new Timer();
         final LinkedList<Process> jobQueue = generateProcessesList();
-        timer.schedule(new JobScheduler(timer, pagings.remove(0), jobQueue), 0, 100);
+        timer.schedule(new JobScheduler(timer, pagings.remove(0), jobQueue, pagings.remove(0).getAlg().toString()), 0, 100);
     }
 
     private static LinkedList<Process> generateProcessesList() {
@@ -77,18 +77,20 @@ public class Tester {
     private static float formatDecimal(float d, int decimalPlace) {
         return new BigDecimal(Float.toString(d)).setScale(decimalPlace, BigDecimal.ROUND_HALF_UP).floatValue();
     }
-
+    
     private static class JobScheduler extends TimerTask {
 
         final long t0 = System.currentTimeMillis();
         final Timer timer;
         final Paging paging;
         final LinkedList<Process> jobQueue;
+        final String alg;
 
-        JobScheduler(Timer timer, Paging paging, LinkedList<Process> jobQueue) {
+        JobScheduler(Timer timer, Paging paging, LinkedList<Process> jobQueue, String alg) {
             this.timer = timer;
             this.paging = paging;
             this.jobQueue = jobQueue;
+            this.alg = alg;
         }
 
         @Override
@@ -104,7 +106,7 @@ public class Tester {
                 avgProcessesMissed += processesMissedThisRun;
                 final double pagesHitMissThisRun = paging.getPagesHit() / paging.getPagesMissed();
                 avgPagesHitMiss += pagesHitMissThisRun;
-
+                System.out.println("Running Processes using " + this.alg + " swapping algorihm");
                 System.out.println("Total Number of processes finished: " + processesFinishedThisRun);
                 System.out.println("Processes Missed: " + processesMissedThisRun);
                 System.out.println("Total Pages in the job queue: " + totalPages);
@@ -121,8 +123,10 @@ public class Tester {
                     }
                     final Timer newTimer = new Timer();
                     final LinkedList<Process> newJobQueue = generateProcessesList();
-                    newTimer.schedule(new JobScheduler(newTimer, pagings.remove(0), newJobQueue), 0, 100);
+                    newTimer.schedule(new JobScheduler(newTimer, pagings.remove(0), newJobQueue, pagings.remove(0).getAlg().toString()), 0, 100);
                 } else {
+                    System.out.println("Printing the stats for 5 runs using " + this.alg + " swapping algorithm");
+
                     System.out.println("Average number of processes finished in 5 runs: " + avgProcessesFinished / 5.0);
                     System.out.println("Average number of processes missed in 5 runs: " + avgProcessesMissed / 5.0);
                     System.out.println("Average hits/miss ratio of pages in 5 runs: " + avgPagesHitMiss / 5.0);

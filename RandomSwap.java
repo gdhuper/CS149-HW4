@@ -11,4 +11,11 @@ public class RandomSwap implements ReplacementAlgorithm {
 
 		return occupiedPages.remove(random.nextInt(occupiedPages.size()));
 	}
+
+	@Override
+	public String toString() {
+		return "RandomSwap";
+	}
+	
+	
 }

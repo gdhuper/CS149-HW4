@@ -11,4 +11,11 @@ public class FIFO implements ReplacementAlgorithm {
         
 		return occupiedPages.remove(0);
     }
+
+	@Override
+	public String toString() {
+		return "FIFO";
+	}
+    
+    
 }
