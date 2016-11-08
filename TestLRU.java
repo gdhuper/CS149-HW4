@@ -18,7 +18,7 @@ public class TestLRU {
 	public static void main(String[] args)
 	{
 		
-		for(int i = 1; i <= 200; i++)
+		/**for(int i = 1; i <= 200; i++)
 		{
 			list.add(new Page(i));
 		}
@@ -42,6 +42,15 @@ public class TestLRU {
 	                }
 	            }
 	        }, 0, 100);
+	        */
+		int i= 0;
+		while(i < 5)
+		{
+			System.out.println("Sdfs");
+			i++;
+		}
+	        
+	        
         }
 	
 	

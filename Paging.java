@@ -12,14 +12,14 @@ public class Paging {
     private final List<Process> runningProcesses;
     private final List<Page> occupiedPagesList;
     private final Random random = new Random();
-
+    private double pagesHit;
 	private int finishedProcessCount;
     private AtomicBoolean continueExecuting;
 
     public Paging(int memorySize, int pageSize, int minPagesRequired, ReplacementAlgorithm alg) {
         this.minPagesRequired = minPagesRequired;
         this.alg = alg;
-
+        this.pagesHit = 0;
         pagesCount = memorySize / pageSize;
         pageMap = new Process[pagesCount]; // array to keep track of running processes
         freePagesList = new ConcurrentLinkedQueue<>();
@@ -99,6 +99,7 @@ public class Paging {
         Page page = freePagesList.isEmpty() ? findPageToSwap() : freePagesList.remove();
 
         if (page != null && continueExecuting.get()) {
+        	pagesHit++;
             System.out.println("Referencing page for " + process.getName() + ": 0");
             process.setPageReferenced(0, page);
             page.setReferencedProcess(process);
@@ -126,6 +127,7 @@ public class Paging {
         Page page = freePagesList.isEmpty() ? findPageToSwap() : freePagesList.remove();
 
         if (page != null && continueExecuting.get()) {
+        	pagesHit++;
             System.out.println("Referencing page for " + process.getName() + ": " + pageToRefer);
             process.setPageReferenced(pageToRefer, page);
             page.setReferencedProcess(process);
@@ -143,7 +145,15 @@ public class Paging {
         }
     }
 
-    /**
+    public double getPagesHit() {
+		return pagesHit;
+	}
+
+	public void setPagesHit(double pagesHit) {
+		this.pagesHit = pagesHit;
+	}
+
+	/**
      * Use given algorithm to find a page to swap. If found, dereference page from process and update map.
      *
      * @return the page to swap
