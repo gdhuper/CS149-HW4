@@ -29,9 +29,9 @@ public class Tester {
             }
             jobQueue.add(generateProcess(name, MIN_ARRIVAL_TIME, MAX_ARRIVAL_TIME));
         }
-        
+
         int totalPages = 0; //to store total pages in job queue combined
-        
+
         for(Process p: jobQueue)
         {
         	totalPages += p.getPageCount();
@@ -51,7 +51,7 @@ public class Tester {
         pagings.add(new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new FIFO())); //creating a new paging object and adding it to pagings arraylist
         i++;
         }
-       
+
 
         final Timer timer = new Timer();
         timer.schedule(new JobScheduler(timer, FIFOPaging, jobQueue, totalPages), 0, 100);
@@ -89,7 +89,6 @@ public class Tester {
             this.paging = paging;
             this.jobQueue = jobQueue;
             this.totalPages = totalPages;
-            
         }
 
         @Override
@@ -98,11 +97,10 @@ public class Tester {
 
             if (elapsedTime >= MAX_ARRIVAL_TIME * 1000) {
                 // Cancel after 1 minute (60 * 1000 msec)
-            	paging.stopExecution();
                 timer.cancel();
                 avgProcessesFinished += paging.getFinishedProcessCount();
                 avgProcessesMissed += (150 - paging.getFinishedProcessCount());
-                double pageHitMiss = (double)paging.getPagesHit()/((double)totalPages - (double)paging.getPagesHit());
+                double pageHitMiss = (double)(paging.getPagesHit()/(totalPages-paging.getPagesHit()));
                 avgPagesHitMiss += pageHitMiss;
                 System.out.println("Total Number of processes finished: " + paging.getFinishedProcessCount());
                 System.out.println("Processes Missed: " + (150- paging.getFinishedProcessCount()));
@@ -110,7 +108,7 @@ public class Tester {
                 System.out.println("Total Pages hit in this run: " + paging.getPagesHit());
                 System.out.println("Total Pages missed in this run: " + (totalPages - paging.getPagesHit()));
                 System.out.println("Page Hit/Miss Ratio for this run: " + (double)(paging.getPagesHit()/(totalPages-paging.getPagesHit())));
- 
+
                 if (!pagings.isEmpty()) {
                     Timer newTimer = new Timer();
                     newTimer.schedule(new JobScheduler(newTimer, pagings.remove(0), jobQueue, this.totalPages), 0, 100);
@@ -118,7 +116,7 @@ public class Tester {
                     System.out.println("Average number of processes finished in 5 runs: " + avgProcessesFinished / 5);
                     System.out.println("Average number of processes missed in 5 runs: " + avgProcessesMissed / 5);
                     System.out.println("Average hits/miss ratio of pages in 5 runs: " + avgPagesHitMiss / 5.0);
-                    
+
                 }
             } else if (!paging.isFull() && scheduledJobsCount != jobQueue.size()) {
                 // Every 100 msec, run new job if at least 4 pages can be assigned to each running job
@@ -129,7 +127,7 @@ public class Tester {
                     System.out.printf("%s (SIZE: %d, DURATION: %.0f) ENTER: %.2fsec\n%s\n",
                             p.getName(), p.getPageCount(), p.getServiceDuration(), elapsedTime / 1000.0,
                             paging.toString());
-                    paging.executeProcess(p, elapsedTime); //executes the process
+                    paging.executeProcess(p, elapsedTime, MAX_ARRIVAL_TIME); //executes the process
                     scheduledJobsCount++;
                 }
             }

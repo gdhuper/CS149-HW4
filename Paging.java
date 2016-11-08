@@ -1,6 +1,5 @@
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Paging {
 
@@ -14,7 +13,6 @@ public class Paging {
     private final Random random = new Random();
     private double pagesHit;
 	private int finishedProcessCount;
-    private AtomicBoolean continueExecuting;
 
     public Paging(int memorySize, int pageSize, int minPagesRequired, ReplacementAlgorithm alg) {
         this.minPagesRequired = minPagesRequired;
@@ -27,7 +25,6 @@ public class Paging {
         occupiedPagesList = Collections.synchronizedList(new LinkedList<Page>()); // List of all pages that reference some processes' page
         
         finishedProcessCount = 0; //keep track of finished processes
-        continueExecuting = new AtomicBoolean(true);
         // Initialize free pages
         for (int i = 0; i < pagesCount; i++)
             freePagesList.add(new Page(i));
@@ -47,17 +44,13 @@ public class Paging {
     	return this.finishedProcessCount;
     }
 
-	public void stopExecution() {
-        continueExecuting.set(false);
-	}
-
     /**
      * Execute process for its provided duration. Create a new thread for each process.
      *
      * @param process the process to be executed
      * @param startTime the start time of the process
      */
-    public void executeProcess(Process process, float startTime) {
+    public void executeProcess(Process process, float startTime, float maxRunTime) {
         initializeProcess(process);
 
         final Timer timer = new Timer();
@@ -66,22 +59,21 @@ public class Paging {
 
             @Override
             public void run() {
-                if (!continueExecuting.get())
-                    timer.cancel();
-
                 final long elapsedTime = System.currentTimeMillis() - t0;
 
                 // Run each process for its service duration
                 if (elapsedTime >= process.getServiceDuration() * 1000) {
                     // Process is finished
-                    System.err.printf("%s (SIZE: %d, DURATION: %.0f) EXIT: %.2fsec\n%s\n",
-                            process.getName(), process.getPageCount(), process.getServiceDuration(),
-                            (startTime + elapsedTime) / 1000.0, Paging.this.toString());
-                    runningProcesses.remove(process);
-                    finishedProcessCount++;
+                    if ((startTime + elapsedTime) <= maxRunTime * 1000) {
+                        System.err.printf("%s (SIZE: %d, DURATION: %.0f) EXIT: %.2fsec\n%s\n",
+                                process.getName(), process.getPageCount(), process.getServiceDuration(),
+                                (startTime + elapsedTime) / 1000.0, Paging.this.toString());
+                        runningProcesses.remove(process);
+                        finishedProcessCount++;
+                    }
 
                     timer.cancel();
-                } else {
+                } else if ((startTime + elapsedTime) <= maxRunTime * 1000) {
                     // Every 100 msec make a memory reference to another page in that process
                     referencePage(process);
                 }
@@ -98,7 +90,7 @@ public class Paging {
         // Get page from freePagesList or find a page to swap out
         Page page = freePagesList.isEmpty() ? findPageToSwap() : freePagesList.remove();
 
-        if (page != null && continueExecuting.get()) {
+        if (page != null) {
         	pagesHit++;
             System.out.println("Referencing page for " + process.getName() + ": 0");
             process.setPageReferenced(0, page);
@@ -126,8 +118,8 @@ public class Paging {
         // Get page from freePagesList or find a page to swap out
         Page page = freePagesList.isEmpty() ? findPageToSwap() : freePagesList.remove();
 
-        if (page != null && continueExecuting.get()) {
-        	pagesHit++;
+        if (page != null) {
+            pagesHit++;
             System.out.println("Referencing page for " + process.getName() + ": " + pageToRefer);
             process.setPageReferenced(pageToRefer, page);
             page.setReferencedProcess(process);
@@ -135,13 +127,13 @@ public class Paging {
             updatePageMap(page, process);
             System.out.println(this.toString());
             
-            if(page.getIdxLRU() != -1) //if LRU is used as swapping algorithm
+            if (page.getIdxLRU() != -1) //if LRU is used as swapping algorithm
             {
             	occupiedPagesList.set(page.getIdxLRU(), page); //setting the value of the least recently used page to new page of current process
             }
-           else { //if LRU is not used as swapping algorithm 
-           	occupiedPagesList.add(page);
-           }
+            else { //if LRU is not used as swapping algorithm
+           	    occupiedPagesList.add(page);
+            }
         }
     }
 
