@@ -12,49 +12,52 @@ public class Tester {
     private static final int MIN_PAGES_REQUIRED = 4;
     private static final float MIN_ARRIVAL_TIME = 0;
     private static final float MAX_ARRIVAL_TIME = 60;
-    private static final int[] MEMORY_SIZES = { 5, 11, 17, 31 };
+    private static final int[] MEMORY_SIZES = {5, 11, 17, 31};
+    private static final Random random = new Random();
     private static int avgProcessesFinished = 0;
     private static int avgProcessesMissed = 0;
     private static double avgPagesHitMiss = 0;
-    private static ArrayList<Paging> pagings;
-
-    private static final Random random = new Random();
+    private static int totalPages = 0;
+    private static ArrayList<Paging> pagings = new ArrayList<>();
+    private static int algRunCount = 0;
 
     public static void main(String args[]) {
+        for (int i = 0; i < 5; i++) {
+            //creating a new paging object and adding it to pagings arraylist
+            pagings.add(new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new FIFO()));
+        }
+        for (int i = 0; i < 5; i++) {
+            pagings.add(new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new RandomSwap()));
+        }
+        for (int i = 0; i < 5; i++) {
+            pagings.add(new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new LFU()));
+        }
+        for (int i = 0; i < 5; i++) {
+            pagings.add(new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new MFU()));
+        }
+        for (int i = 0; i < 5; i++) {
+            pagings.add(new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new LRU()));
+        }
+
+        final Timer timer = new Timer();
+        final LinkedList<Process> jobQueue = generateProcessesList();
+        timer.schedule(new JobScheduler(timer, pagings.remove(0), jobQueue), 0, 100);
+    }
+
+    private static LinkedList<Process> generateProcessesList() {
         final LinkedList<Process> jobQueue = new LinkedList<>();
+        totalPages = 0;
         for (int i = 0; i < MAX_JOBS + 1; i++) {
             char name = (char) ('!' + i);
             if (name == '.') {
                 name = (char) ('!' + ++i);
             }
-            jobQueue.add(generateProcess(name, MIN_ARRIVAL_TIME, MAX_ARRIVAL_TIME));
-        }
-
-        int totalPages = 0; //to store total pages in job queue combined
-
-        for(Process p: jobQueue)
-        {
-        	totalPages += p.getPageCount();
+            Process p = generateProcess(name, MIN_ARRIVAL_TIME, MAX_ARRIVAL_TIME);
+            totalPages += p.getPageCount();
+            jobQueue.add(p);
         }
         Collections.sort(jobQueue, Process::compareTo);
-
-        final Paging FIFOPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new FIFO());
-        final Paging randomPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new RandomSwap());
-        final Paging LFUPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new LFU());
-        final Paging MFUPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new MFU());
-        final Paging LRUPaging = new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new LRU());
-
-        pagings = new ArrayList<>();
-        int i = 0;
-        while(i < 4)
-        {
-       pagings.add(new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new LRU())); //creating a new paging object and adding it to pagings arraylist
-        i++;
-       }
-
-
-        final Timer timer = new Timer();
-        timer.schedule(new JobScheduler(timer, LRUPaging, jobQueue, totalPages), 0, 100);
+        return jobQueue;
     }
 
     private static Process generateProcess(char name, float minArrivalTime, float maxArrivalTime) {
@@ -81,14 +84,11 @@ public class Tester {
         final Timer timer;
         final Paging paging;
         final LinkedList<Process> jobQueue;
-        final int totalPages;
-        int scheduledJobsCount = 0;
 
-        JobScheduler(Timer timer, Paging paging, LinkedList<Process> jobQueue, int totalPages) {
+        JobScheduler(Timer timer, Paging paging, LinkedList<Process> jobQueue) {
             this.timer = timer;
             this.paging = paging;
             this.jobQueue = jobQueue;
-            this.totalPages = totalPages;
         }
 
         @Override
@@ -98,29 +98,41 @@ public class Tester {
             if (elapsedTime >= MAX_ARRIVAL_TIME * 1000) {
                 // Cancel after 1 minute (60 * 1000 msec)
                 timer.cancel();
-                avgProcessesFinished += paging.getFinishedProcessCount();
-                avgProcessesMissed += (150 - paging.getFinishedProcessCount());
-                double pageHitMiss = (double)(paging.getPagesHit()/(totalPages-paging.getPagesHit()));
-                avgPagesHitMiss += pageHitMiss;
-                System.out.println("Total Number of processes finished: " + paging.getFinishedProcessCount());
-                System.out.println("Processes Missed: " + (150- paging.getFinishedProcessCount()));
-                System.out.println("Total Pages in the job queue combined :" + totalPages);
+                final int processesFinishedThisRun = paging.getFinishedProcessCount();
+                avgProcessesFinished += processesFinishedThisRun;
+                final int processesMissedThisRun = (150 - paging.getFinishedProcessCount());
+                avgProcessesMissed += processesMissedThisRun;
+                final double pagesHitMissThisRun = paging.getPagesHit() / (totalPages - paging.getPagesHit());
+                avgPagesHitMiss += pagesHitMissThisRun;
+
+                System.out.println("Total Number of processes finished: " + processesFinishedThisRun);
+                System.out.println("Processes Missed: " + processesMissedThisRun);
+                System.out.println("Total Pages in the job queue combined: " + totalPages);
                 System.out.println("Total Pages hit in this run: " + paging.getPagesHit());
                 System.out.println("Total Pages missed in this run: " + (totalPages - paging.getPagesHit()));
-                System.out.println("Page Hit/Miss Ratio for this run: " + (double)(paging.getPagesHit()/(totalPages-paging.getPagesHit())));
+                System.out.println("Page Hit/Miss Ratio for this run: " + pagesHitMissThisRun + "\n");
+
+                algRunCount++;
 
                 if (!pagings.isEmpty()) {
-                    Timer newTimer = new Timer();
-                    newTimer.schedule(new JobScheduler(newTimer, pagings.remove(0), jobQueue, this.totalPages), 0, 100);
+                    if (algRunCount == 5) {
+                        algRunCount = 0;
+                        avgPagesHitMiss = 0;
+                        avgProcessesFinished = 0;
+                        avgProcessesMissed = 0;
+                    }
+                    final Timer newTimer = new Timer();
+                    final LinkedList<Process> newJobQueue = generateProcessesList();
+                    newTimer.schedule(new JobScheduler(newTimer, pagings.remove(0), newJobQueue), 0, 100);
                 } else {
-                    System.out.println("Average number of processes finished in 5 runs: " + avgProcessesFinished / 5);
-                    System.out.println("Average number of processes missed in 5 runs: " + avgProcessesMissed / 5);
+                    System.out.println("Average number of processes finished in 5 runs: " + avgProcessesFinished / 5.0);
+                    System.out.println("Average number of processes missed in 5 runs: " + avgProcessesMissed / 5.0);
                     System.out.println("Average hits/miss ratio of pages in 5 runs: " + avgPagesHitMiss / 5.0);
 
                 }
-            } else if (!paging.isFull() && scheduledJobsCount != jobQueue.size()) {
+            } else if (!paging.isFull() && !jobQueue.isEmpty()) {
                 // Every 100 msec, run new job if at least 4 pages can be assigned to each running job
-                final Process p = jobQueue.get(scheduledJobsCount);
+                final Process p = jobQueue.getFirst();
 
                 // Check if a new job is arriving
                 if (elapsedTime / 1000.0 >= p.getArrivalTime()) {
@@ -128,7 +140,7 @@ public class Tester {
                             p.getName(), p.getPageCount(), p.getServiceDuration(), elapsedTime / 1000.0,
                             paging.toString());
                     paging.executeProcess(p, elapsedTime, MAX_ARRIVAL_TIME); //executes the process
-                    scheduledJobsCount++;
+                    jobQueue.removeFirst();
                 }
             }
         }
