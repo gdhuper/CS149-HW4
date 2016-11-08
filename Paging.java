@@ -127,13 +127,13 @@ public class Paging {
             updatePageMap(page, process);
             System.out.println(this.toString());
             
-            if (page.getIdxLRU() != -1) //if LRU is used as swapping algorithm
-            {
-            	occupiedPagesList.set(page.getIdxLRU(), page); //setting the value of the least recently used page to new page of current process
-            }
-            else { //if LRU is not used as swapping algorithm
+            //if (page.getIdxLRU() != -1) //if LRU is used as swapping algorithm
+            //{
+            //	occupiedPagesList.set(page.getIdxLRU(), page); //setting the value of the least recently used page to new page of current process
+           // }
+           // else { //if LRU is not used as swapping algorithm
            	    occupiedPagesList.add(page);
-            }
+           // }
         }
     }
 

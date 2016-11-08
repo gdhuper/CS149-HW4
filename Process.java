@@ -36,6 +36,7 @@ public class Process implements Comparable<Process> {
         for (Page p : pages) {
             if (p.getReferencedPage() == pageNumber) {
                 p.incrementUseCount();
+                p.incrementoldestRef(); //for LRU
                 return true;
             }
         }
@@ -62,6 +63,7 @@ public class Process implements Comparable<Process> {
         for (Page p : pages) {
             if (p.getReferencedPage() == i) {
                 p.setReferencedPage(-1);
+                p.setOldestRef(-1); //for LRU
                 break;
             }
         }

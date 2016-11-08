@@ -48,13 +48,13 @@ public class Tester {
         int i = 0;
         while(i < 4)
         {
-        pagings.add(new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new FIFO())); //creating a new paging object and adding it to pagings arraylist
+       pagings.add(new Paging(MEMORY_LIMIT, PAGE_SIZE, MIN_PAGES_REQUIRED, new LRU())); //creating a new paging object and adding it to pagings arraylist
         i++;
-        }
+       }
 
 
         final Timer timer = new Timer();
-        timer.schedule(new JobScheduler(timer, FIFOPaging, jobQueue, totalPages), 0, 100);
+        timer.schedule(new JobScheduler(timer, LRUPaging, jobQueue, totalPages), 0, 100);
     }
 
     private static Process generateProcess(char name, float minArrivalTime, float maxArrivalTime) {

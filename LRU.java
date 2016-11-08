@@ -2,7 +2,7 @@ import java.util.List;
 
 public class LRU implements ReplacementAlgorithm {
 	
-	private int leastRecentlyUsedIdx = 0;
+	private int leastused = -1;
 
 	@Override
 	public Page findPageToReplace(List<Page> occupiedPages) {
@@ -12,33 +12,20 @@ public class LRU implements ReplacementAlgorithm {
 			}
 		
 		else{
-			if(occupiedPages.size() < 100)   //if size < 100 start switching page at index 0 and increment index
+			Page lru = occupiedPages.get(0);
+			for(int i = 1; i < occupiedPages.size(); i++)
 			{
-				int occupiedPagesIdx = leastRecentlyUsedIdx; 
-				Page LRU = occupiedPages.get(leastRecentlyUsedIdx++);
-				LRU.setIdxLRU(occupiedPagesIdx);
-				return LRU;
-				
+				Page temp = occupiedPages.get(i);
+				if(temp.getOldestRef() < lru.getOldestRef() && temp.getTime().compareTo(lru.getTime()) > 1)
+				{
+					lru = temp;
+				}
+					
 			}
-			if(occupiedPages.size() == 100) //else if size = 100 start again from index 0
-			{
-				leastRecentlyUsedIdx = 0;
-				Page LRU = occupiedPages.get(leastRecentlyUsedIdx++);
-				LRU.setIdxLRU(0);
-				return LRU;
-			}
-			
+			return occupiedPages.remove(occupiedPages.indexOf(lru));
 		}
-		
-		return null;
-		
-
-	
+	 
 		
 	}
 
-	@Override
-	public String toString() {
-		return "LRU";
-	}
 }
