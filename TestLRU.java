@@ -1,4 +1,6 @@
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -18,7 +20,7 @@ public class TestLRU {
 	public static void main(String[] args)
 	{
 		
-	for(int i = 1; i <= 100; i++)
+	/**for(int i = 1; i <= 100; i++)
 		{
 			list.add(new Page(i));
 		}
@@ -44,7 +46,15 @@ public class TestLRU {
 	        }, 0, 100);
 	        
 	  
-	        
+	        */
+		Timestamp currentTimestamp = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
+		
+		Timestamp currentTimestamp2 = new java.sql.Timestamp(Calendar.getInstance().getTime().getTime());
+
+		System.out.println(currentTimestamp);
+		System.out.println(currentTimestamp2);
+
+
         }
 	
 	
